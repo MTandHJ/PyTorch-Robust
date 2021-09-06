@@ -33,7 +33,7 @@ class _GaussBlur:
 
 
 
-ROOT = "../data" # the path saving the data
+ROOT = "../../data" # the path saving the data
 SAVED_FILENAME = "paras.pt" # the filename of saved model paramters
 INFO_PATH = "./infos/{method}/{dataset}-{model}/{description}"
 LOG_PATH = "./logs/{method}/{dataset}-{model}/{description}-{time}"
