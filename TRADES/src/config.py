@@ -41,7 +41,8 @@ TIMEFMT = "%m%d%H"
 
 # logger
 LOGGER = Config(
-    name='RFK', filename='log.txt', level=logging.INFO,
+    name='RFK', filename='log.txt', level=logging.DEBUG,
+    filelevel=logging.DEBUG, consolelevel=logging.INFO,
     formatter=Config(
         filehandler=logging.Formatter('%(asctime)s:\t%(message)s'),
         consolehandler=logging.Formatter('%(message)s')
