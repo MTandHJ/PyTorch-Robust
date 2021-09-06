@@ -34,7 +34,7 @@
 
 
 
-| $\ell_{\infty} |\epsilon$ | leverage |   Net    |  LP  | Nat(%) | FGSM  | PGD-10 | PGD-40 | DeepFool |  AA   |
+| $\ell_{\infty}$ | leverage |   Net    |  LP  | Nat(%) | FGSM  | PGD-10 | PGD-40 | DeepFool |  AA   |
 | :-----------------------: | :------: | :------: | :--: | :----: | :---: | :----: | :----: | :------: | :---: |
 |           8/255           |   0.5    | ResNet32 |  AT  | 80.70  | 53.18 | 47.76  | 46.95  |  49.54   | 43.23 |
 |          16/255           |   0.5    | ResNet32 |  AT  | 80.70  | 33.85 | 18.83  | 16.55  |  27.22   | 12.27 |
@@ -45,7 +45,7 @@
 
 
 
-| $\ell_2|\epsilon$ | leverage |   Net    |  LP  | Nat(%) | PGD-50 | DeepFool |  C&W  |  AA   |
+| $\ell_2$ | leverage |   Net    |  LP  | Nat(%) | PGD-50 | DeepFool |  C&W  |  AA   |
 | :---------------: | :------: | :------: | :--: | :----: | :----: | :------: | :---: | :---: |
 |        0.5        |   0.5    | ResNet32 |  AT  | 80.70  | 56.22  |  58.91   | 54.26 | 53.34 |
 |        0.5        |    1     | ResNet32 |  AT  | 77.12  | 56.34  |  58.00   | 53.91 | 53.25 |
@@ -53,7 +53,7 @@
 
 
 
-| $\ell_1|\epsilon$ | leverage |   Net    |  LP  | Nat(%) | PGD-50 | SLIDE |
+| $\ell_1$ | leverage |   Net    |  LP  | Nat(%) | PGD-50 | SLIDE |
 | :---------------: | :------: | :------: | :--: | :----: | :----: | :---: |
 |        12         |   0.5    | ResNet32 |  AT  | 80.70  | 55.68  | 22.16 |
 |        12         |    1     | ResNet32 |  AT  | 77.12  | 55.69  | 24.11 |
@@ -64,7 +64,7 @@
 
 
 
-| $\ell_{\infty} |\epsilon$ | leverage |  Net  |  LP  | Nat(%) | FGSM  | PGD-50 | PGD-100 | DeepFool |  AA   |
+| $\ell_{\infty}$ | leverage |  Net  |  LP  | Nat(%) | FGSM  | PGD-50 | PGD-100 | DeepFool |  AA   |
 | :-----------------------: | :------: | :---: | :--: | :----: | :---: | :----: | :-----: | :------: | :---: |
 |            0.3            |   0.5    | mnist | null | 99.41  | 97.84 | 96.71  |  96.08  |  97.17   | 92.60 |
 
@@ -76,7 +76,7 @@
 
 
 
-| $\ell_1|\epsilon$ | leverage |  Net  |  LP  | Nat(%) | PGD-50 | SLIDE |
+| $\ell_1$ | leverage |  Net  |  LP  | Nat(%) | PGD-50 | SLIDE |
 | :---------------: | :------: | :---: | :--: | :----: | :----: | :---: |
 |        10         |   0.5    | mnist | null | 99.41  | 97.91  | 90.74 |
 
@@ -88,19 +88,19 @@
 
 
 
-| $\ell_{\infty} |\epsilon$ | leverage |  Net  |  LP  | Nat(%) | FGSM  | PGD-50 | PGD-100 | DeepFool |  AA   |
+| $\ell_{\infty}$ | leverage |  Net  |  LP  | Nat(%) | FGSM  | PGD-50 | PGD-100 | DeepFool |  AA   |
 | :-----------------------: | :------: | :---: | :--: | :----: | :---: | :----: | :-----: | :------: | :---: |
 |            0.3            |   0.5    | mnist | null | 83.08  | 68.21 | 61.40  |  55.82  |  56.35   | 24.25 |
 
 
 
-| $\ell_2|\epsilon$ | Leverage |  Net  |  LP  | Nat(%) | PGD-100 | DeepFool |  C&W  |  AA  |
+| $\ell_2$ | Leverage |  Net  |  LP  | Nat(%) | PGD-100 | DeepFool |  C&W  |  AA  |
 | :---------------: | :------: | :---: | :--: | :----: | :-----: | :------: | :---: | :--: |
 |         2         |   0.5    | mnist | null | 83.08  |  64.14  |  66.16   | 25.53 | 2.35 |
 
 
 
-| $\ell_1|\epsilon$ | leverage |  Net  |  LP  | Nat(%) | PGD-50 | SLIDE |
+| $\ell_1$ | leverage |  Net  |  LP  | Nat(%) | PGD-50 | SLIDE |
 | :---------------: | :------: | :---: | :--: | :----: | :----: | :---: |
 |        10         |   0.5    | mnist | null | 83.08  | 65.74  | 53.65 |
 
