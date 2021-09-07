@@ -31,7 +31,7 @@ parser.add_argument("-beta1", "--beta1", type=float, default=0.9,
                 help="the first beta argument for Adam")
 parser.add_argument("-beta2", "--beta2", type=float, default=0.999,
                 help="the second beta argument for Adam")
-parser.add_argument("-wd", "--weight_decay", type=float, default=0.,
+parser.add_argument("-wd", "--weight_decay", type=float, default=1e-4,
                 help="weight decay")
 parser.add_argument("-lr", "--lr", "--LR", "--learning_rate", type=float, default=0.01)
 parser.add_argument("-lp", "--learning_policy", type=str, default="MMC-C", 
