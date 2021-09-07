@@ -14,11 +14,11 @@ You may prefer the official codes:
 
 ### CIFAR-10
 
-    python train.py preact18 cifar10 -lp=Fast --epochs=15 -b=128 -wd=5e-4 --lr-min=0 --lr-max=0.04
+    python train.py preact18 cifar10 -lp=Fast --epochs=15 -b=128 -wd=5e-4 --lr-min=0 --lr-max=0.2
 
 ### CIFAR-100
 
-    python train.py preact18 cifar100 -lp=Fast --epochs=15 -b=128 -wd=5e-4 --lr-min=0 --lr-max=0.04
+    python train.py preact18 cifar100 -lp=Fast --epochs=15 -b=128 -wd=5e-4 --lr-min=0 --lr-max=0.2
 
 ### MNIST
 

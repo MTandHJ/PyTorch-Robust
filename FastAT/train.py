@@ -40,7 +40,7 @@ parser.add_argument("-wd", "--weight_decay", type=float, default=5e-4,
                 help="weight decay")
 # parser.add_argument("-lr", "--lr", "--LR", "--learning_rate", type=float, default=0.1)
 parser.add_argument('--lr-min', default=0., type=float)
-parser.add_argument('--lr-max', default=0.04, type=float)
+parser.add_argument('--lr-max', default=0.2, type=float)
 parser.add_argument("-lp", "--learning_policy", type=str, default="Fast", 
                 help="learning rate schedule defined in config.py")
 parser.add_argument("--epochs", type=int, default=15)

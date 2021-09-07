@@ -75,8 +75,9 @@ class Coach:
             self.loss.update(loss.item(), inputs.size(0), mode="mean")
             self.acc.update(accuracy_count, inputs.size(0), mode="sum")
 
+            self.learning_policy.step() # update the learning rate per step !!!
+
         self.progress.display(epoch=epoch)
-        self.learning_policy.step() # update the learning rate
         return self.loss.avg
 
     

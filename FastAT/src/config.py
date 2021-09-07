@@ -152,7 +152,7 @@ LEARNING_POLICY = {
             max_lr=0.04,
             step_size_up=None,
             step_size_down=None,
-            prefix="Null leaning policy will be applied:"
+            prefix="Official leaning policy will be applied:"
         )
     ),
 }
