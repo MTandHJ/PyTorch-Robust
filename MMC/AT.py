@@ -30,7 +30,6 @@ parser.add_argument("--steps", type=int, default=10)
 parser.add_argument("--scale", type=float, default=10.)
 
 # basic settings
-parser.add_argument("--loss", type=str, default="cross_entropy")
 parser.add_argument("--optimizer", type=str, choices=("sgd", "adam"), default="sgd")
 parser.add_argument("-mom", "--momentum", type=float, default=0.9,
                 help="the momentum used for SGD")
@@ -140,7 +139,7 @@ def load_cfg() -> Tuple[Config, str]:
 
     cfg['coach'] = Coach(
         model=model, device=device, 
-        loss_func=load_loss_func(opts.loss), 
+        loss_func=None, 
         optimizer=optimizer, 
         learning_policy=learning_policy
     )
