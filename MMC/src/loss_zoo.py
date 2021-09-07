@@ -58,7 +58,7 @@ def dotloss(
     labels: N
     """
     labels = labels.view(-1, 1)
-    loss = logits.gather(dim=-1, index=labels).squeeze()
+    loss = -logits.gather(dim=-1, index=labels).squeeze()
     if reduction == "mean":
         return loss.mean()
     elif reduction == "sum":

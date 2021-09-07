@@ -108,7 +108,7 @@ class WideResNet(ADArch):
         x = self.relu(self.bn1(x))
         features = self.avg_pool(x).flatten(start_dim=1)
         features = torch.flatten(x, 1).unsqueeze(dim=1)
-        logits = (features - self.fc.weight).pow(2).sum(dim=-1) # N x K
+        logits = -(features - self.fc.weight).pow(2).sum(dim=-1) # N x K
         return logits
         
 

@@ -52,5 +52,5 @@ class CIFAR(ADArch):
         x = self.conv(x).flatten(start_dim=1)
         features = self.activation(self.dense(x))
         features = torch.flatten(x, 1).unsqueeze(dim=1)
-        logits = (features - self.fc.weight).pow(2).sum(dim=-1) # N x K
+        logits = -(features - self.fc.weight).pow(2).sum(dim=-1) # N x K
         return logits
