@@ -57,7 +57,6 @@ class MNIST(ADArch):
 
     def forward(self, x):
         x = self.conv(x).flatten(start_dim=1)
-        features = self.activation(self.dense(x))
-        features = torch.flatten(x, 1).unsqueeze(dim=1)
+        features = self.activation(self.dense(x)).unsqueeze(dim=1)
         logits = -(features - self.fc.weight).pow(2).sum(dim=-1) # N x K
         return logits
