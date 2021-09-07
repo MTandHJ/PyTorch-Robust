@@ -1,10 +1,9 @@
 
 
-from typing import Optional, Union
+from typing import Optional, Union, Iterable
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torchvision.transforms.transforms import Iterable
 
 
 

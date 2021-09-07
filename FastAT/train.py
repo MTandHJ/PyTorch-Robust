@@ -47,6 +47,8 @@ parser.add_argument("--epochs", type=int, default=15)
 parser.add_argument("-b", "--batch_size", type=int, default=128)
 parser.add_argument("--transform", type=str, default='default', 
                 help="the data augmentation which will be applied during training.")
+
+parser.add_argument("--eval", action="store_true", default=False)
 parser.add_argument("--resume", action="store_true", default=False)
 parser.add_argument("--progress", action="store_true", default=False, 
                 help="show the progress if true")
@@ -114,7 +116,7 @@ def load_cfg() -> Tuple[Config, str]:
     
     # load the optimizer and learning_policy
     optimizer = load_optimizer(
-        model=model, optim_type=opts.optimizer, lr=opts.lr,
+        model=model, optim_type=opts.optimizer, lr=opts.lr_max,
         momentum=opts.momentum, betas=(opts.beta1, opts.beta2),
         weight_decay=opts.weight_decay
     )
@@ -212,7 +214,7 @@ def main(
         if epoch % SAVE_FREQ == 0:
             save_checkpoint(info_path, coach.model, coach.optimizer, coach.learning_policy, epoch)
 
-        if epoch % PRINT_FREQ == 0:
+        if epoch % PRINT_FREQ == 0 and opts.eval:
             evaluate(
                 valider=valider,
                 trainloader=trainloader, validloader=validloader,

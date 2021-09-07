@@ -1,5 +1,4 @@
 
-from FastAT.models.preact_resnet import preact18
 from typing import TypeVar, Callable, Optional, Tuple, Dict
 import numpy as np
 import torch

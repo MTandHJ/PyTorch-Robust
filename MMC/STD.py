@@ -39,6 +39,8 @@ parser.add_argument("--epochs", type=int, default=200)
 parser.add_argument("-b", "--batch_size", type=int, default=50)
 parser.add_argument("--transform", type=str, default='default', 
                 help="the data augmentation which will be applied during training.")
+
+parser.add_argument("--eval", action="store_true", default=False)
 parser.add_argument("--resume", action="store_true", default=False)
 parser.add_argument("--progress", action="store_true", default=False, 
                 help="show the progress if true")
@@ -190,7 +192,7 @@ def main(
         if epoch % SAVE_FREQ == 0:
             save_checkpoint(info_path, coach.model, coach.optimizer, coach.learning_policy, epoch)
 
-        if epoch % PRINT_FREQ == 0:
+        if epoch % PRINT_FREQ == 0 and opts.eval:
             evaluate(
                 valider=valider,
                 trainloader=trainloader, validloader=validloader,
