@@ -14,7 +14,7 @@
 
 ### CIFAR-100
 
-    python ALP.py resnet32 cifar10 -lp=AT --epochs=200 -wd=0.0002 --leverage=0.5
+    python ALP.py resnet32 cifar100 -lp=AT --epochs=200 -wd=0.0002 --leverage=0.5
 
 ### MNIST
 

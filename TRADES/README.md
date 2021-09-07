@@ -16,7 +16,7 @@
 
 ### CIFAR-100
 
-    python TRADES.py resnet1 cifar10 -lp=TRADES --epochs=76 -wd=0.0002 --leverage=6
+    python TRADES.py resnet1 cifar100 -lp=TRADES --epochs=76 -wd=0.0002 --leverage=6
 
 ### MNIST
 

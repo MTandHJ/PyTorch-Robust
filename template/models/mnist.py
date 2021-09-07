@@ -12,7 +12,7 @@ from .layerops import Sequential
 
 
 class MNIST(ADArch):
-    def __init__(self, dim_features=200, num_classes=10, drop=0.5):
+    def __init__(self, dim_feature=200, num_classes=10, drop=0.5):
         super(MNIST, self).__init__()
 
         self.conv = Sequential(
@@ -32,10 +32,10 @@ class MNIST(ADArch):
             nn.Linear(64 * 4 * 4, 200),
             nn.ReLU(True),
             nn.Dropout(drop),
-            nn.Linear(200, dim_features)
+            nn.Linear(200, dim_feature)
         )
         self.activation = nn.ReLU(True)
-        self.fc = nn.Linear(dim_features, num_classes)
+        self.fc = nn.Linear(dim_feature, num_classes)
 
         for m in self.modules():
             if isinstance(m, (nn.Conv2d)):
