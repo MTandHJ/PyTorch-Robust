@@ -53,4 +53,5 @@ class CIFAR(ADArch):
         x = self.conv(x).flatten(start_dim=1)
         features = self.activation(self.dense(x))
         logits = self.fc(features)
+        logits -= logits.max(dim=-1, keepdim=True)[0] # avoid numerical rounding
         return logits

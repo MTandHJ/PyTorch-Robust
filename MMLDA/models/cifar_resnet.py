@@ -217,6 +217,7 @@ class ResNet(ADArch):
         x = self.avgpool(x) # 512 x 1 x 1
         features = torch.flatten(x, 1)
         logits = self.fc(features)
+        logits -= logits.max(dim=-1, keepdim=True)[0] # avoid numerical rounding
         return logits
 
 

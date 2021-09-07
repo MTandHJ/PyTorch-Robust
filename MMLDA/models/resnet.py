@@ -103,6 +103,7 @@ class ResNet(ADArch):
         
         features = self.avg_pool(l3).flatten(start_dim=1)
         logits = self.fc(features)
+        logits -= logits.max(dim=-1, keepdim=True)[0] # avoid numerical rounding
         return logits
 
 
