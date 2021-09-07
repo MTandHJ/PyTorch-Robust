@@ -1,13 +1,14 @@
 
 
 
-## PGD-AT
+## MMC
 
 
 
-> [Madry A., Makelov A., Schmidt L., Tsipras D., Vladu A. Towards deep learning models resistant to adversarial attacks. In International Conference on Learning Representations (ICLR), 2018.](http://arxiv.org/abs/1706.06083)
+> [Pang T., Xu K., Dong Y., Du C., Chen N. and Zhu J. Rethinking softmax cross-entropy loss for adversarial robustness. In International Conference on Learning Representations (ICLR), 2020.](http://arxiv.org/abs/1905.10626)
 
-> [CIFAR-10-Challenge](https://github.com/MadryLab/mnist_challenge)
+> [Official-Code](https://github.com/P2333/Max-Mahalanobis-Training)
+
 
 ### CIFAR-10
 

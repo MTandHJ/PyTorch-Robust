@@ -8,7 +8,7 @@
 
 > [Zhang H., Yu Y., Jiao J., Xing E., Ghaoui L. and Jordan M. Theoretically principled trade-off between robustness and accuracy. In International Conference on Machine Learning (ICML), 2019.](https://arxiv.org/abs/1901.08573)
 
-> [Offical-Code](https://github.com/yaodongyu/TRADES)
+> [Official-Code](https://github.com/yaodongyu/TRADES)
 
 ### CIFAR-10
 
