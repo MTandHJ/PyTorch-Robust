@@ -224,7 +224,7 @@ def main(
             )
             
 
-        running_loss = coach.adv_train(trainloader, attacker, epoch=epoch)
+        running_loss = coach.train(trainloader, attacker, epoch=epoch)
         writter.add_scalar("Loss", running_loss, epoch)
 
 
