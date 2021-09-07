@@ -1,7 +1,7 @@
 
 
 
-## MMC
+## MMLDA
 
 
 
@@ -9,6 +9,7 @@
 
 > [Official-Code](https://github.com/P2333/Max-Mahalanobis-Training)
 
+**Note:** The architectures used in MMLDA adopt auxiliary Linear layer after AveragePooling. We follows this design otherwise the training will not converge (unless a small learning rate given).
 
 ### CIFAR-10
 

@@ -10,6 +10,8 @@
 > [Official-Code](https://github.com/P2333/Max-Mahalanobis-Training)
 
 
+**Note:** The architectures used in MMLDA adopt auxiliary Linear layer after AveragePooling. We follows this design otherwise the training will not converge (unless a small learning rate given).
+
 ### CIFAR-10
 
     python STD.py resnet32 cifar10 --epochs=200 -lp=MMC-C -b=50 --optimizer=sgd -wd=0 -lr=0.01 --scale=10
