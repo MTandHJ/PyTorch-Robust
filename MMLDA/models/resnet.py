@@ -101,8 +101,8 @@ class ResNet(ADArch):
         l2 = self.layer2(l1)
         l3 = self.layer3(l2)
         
-        features = self.avg_pool(l3).flatten(start_dim=1)
-        logits = self.fc(features)
+        features = self.avg_pool(l3).flatten(start_dim=1).unsqueeze(dim=1)
+        logits = -(features - self.fc.weight).pow(2).sum(dim=-1)
         logits -= logits.max(dim=-1, keepdim=True)[0] # avoid numerical rounding
         return logits
 

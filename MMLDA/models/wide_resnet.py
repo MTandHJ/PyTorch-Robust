@@ -106,8 +106,8 @@ class WideResNet(ADArch):
         x = self.block2(x)
         x = self.block3(x)
         x = self.relu(self.bn1(x))
-        features = self.avg_pool(x).flatten(start_dim=1)
-        logits = self.fc(features)
+        features = self.avg_pool(x).flatten(start_dim=1).unsqueeze(dim=1)
+        logits = -(features - self.fc.weight).pow(2).sum(dim=-1)
         logits -= logits.max(dim=-1, keepdim=True)[0] # avoid numerical rounding
         return logits
         
