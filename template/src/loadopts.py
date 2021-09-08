@@ -41,6 +41,7 @@ def load_model(model_type: str) -> Callable[..., torch.nn.Module]:
     cifar: the model designed for CIFAR dataset
     resnet8|20|32|44|110|1202
     resnet18|34|50|101|50_32x4d
+    preactnet18
     wrn_28_10: depth-28, width-10
     wrn_34_10: depth-34, width-10
     wrn_34_20: depth-34, width-20
@@ -49,6 +50,7 @@ def load_model(model_type: str) -> Callable[..., torch.nn.Module]:
                 'resnet56', 'resnet110', 'resnet1202']
     srns = ['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnext50_32x4d']
     wrns = ['wrn_28_10', 'wrn_34_10', 'wrn_34_20']
+    prns = ['preact18']
 
     model: Callable[..., AdversarialDefensiveModule]
     if model_type == "mnist":
@@ -63,6 +65,9 @@ def load_model(model_type: str) -> Callable[..., torch.nn.Module]:
     elif model_type in srns:
         import models.cifar_resnet as srn
         model = getattr(srn, model_type)
+    elif model_type in prns:
+        import models.preactnet as prn
+        model = getattr(prn, model_type)
     elif model_type in wrns:
         import models.wide_resnet as wrn
         model = getattr(wrn, model_type)

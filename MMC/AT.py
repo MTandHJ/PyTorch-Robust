@@ -11,7 +11,7 @@ from src.utils import timemeter
 METHOD = "MMC-AT"
 SAVE_FREQ = 5
 PRINT_FREQ = 20
-FMT = "{description}={constant}={learning_policy}-{optimizer}-{lr}" \
+FMT = "{description}={scale}={learning_policy}-{optimizer}-{lr}" \
         "={attack}-{epsilon:.4f}-{stepsize}-{steps}" \
         "={batch_size}={transform}"
 
