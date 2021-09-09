@@ -40,7 +40,7 @@ class CIFAR(ADArch):
         )
         self.activation = nn.ReLU(inplace=True)
         self.dense = nn.Linear(dim_feature, dim_feature)
-        self.fc = nn.Linear(dim_feature, num_classes)
+        self.fc = nn.Linear(dim_feature, num_classes, bias=False)
 
         self._generateOptMeans(
             self.fc,
@@ -52,8 +52,6 @@ class CIFAR(ADArch):
     def forward(self, x):
         x = self.conv(x).flatten(start_dim=1)
         features = self.activation(self.dense(x))
-        features = self.dense(features)
-        if self.training:
-            return features, self.fc.weight
-        logits = self.fc(features) * 2
+        features = self.dense(features).unsqueeze(dim=1)
+        logits = -(features - self.fc.weight).pow(2).sum(dim=-1)
         return logits

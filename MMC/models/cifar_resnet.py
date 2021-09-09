@@ -153,7 +153,7 @@ class ResNet(ADArch):
 
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.dense = nn.Linear(512 * block.expansion, 512 * block.expansion)
-        self.fc = nn.Linear(512 * block.expansion, num_classes)
+        self.fc = nn.Linear(512 * block.expansion, num_classes, bias=False)
 
 
         for m in self.modules():
@@ -216,10 +216,8 @@ class ResNet(ADArch):
 
         x = self.avgpool(x) # 512 x 1 x 1
         features = torch.flatten(x, 1) # N x 1 x 512
-        features = self.dense(features)
-        if self.training:
-            return features, self.fc.weight
-        logits = self.fc(features) * 2
+        features = self.dense(features).unsqueeze(dim=1)
+        logits = -(features - self.fc.weight).pow(2).sum(dim=-1)
         return logits
 
 
