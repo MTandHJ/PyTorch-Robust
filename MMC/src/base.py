@@ -41,7 +41,7 @@ class Coach:
         self.learning_policy = learning_policy
         self.loss = AverageMeter("Loss")
         self.acc = AverageMeter("Acc", fmt=".3%")
-        self.progress = ProgressMeter(self.loss)
+        self.progress = ProgressMeter(self.loss, self.acc)
         
     def save(self, path: str, filename: str = SAVED_FILENAME) -> None:
         torch.save(self.model.state_dict(), os.path.join(path, filename))
