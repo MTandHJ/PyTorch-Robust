@@ -12,19 +12,19 @@
 
 ### CIFAR-10
 
-    python TRADES.py resnet18 cifar10 -lp=TRADES --epochs=76 -wd=0.0002 --leverage=6
+    python train.py resnet18 cifar10 -lp=TRADES --epochs=76 -wd=0.0002 --leverage=6
 
 ### CIFAR-100
 
-    python TRADES.py resnet1 cifar100 -lp=TRADES --epochs=76 -wd=0.0002 --leverage=6
+    python train.py resnet18 cifar100 -lp=TRADES --epochs=76 -wd=0.0002 --leverage=6
 
 ### MNIST
 
-    python TRADES.py mnist mnist -lp=TRADES-M --epochs=100 -lr=0.01 -wd=0 -mom=0.9 -b=128 --epsilon=0.3 --steps=40 --stepsize=0.0333333 --leverage=1
+    python train.py mnist mnist -lp=TRADES-M --epochs=100 -lr=0.01 -wd=0 -mom=0.9 -b=128 --epsilon=0.3 --steps=40 --stepsize=0.0333333 --leverage=1
 
 ### FashionMNIST
 
-    python TRADES.py mnist fashionmnist -lp=TRADES-M --epochs=100 -lr=0.01 -wd=0 -mom=0.9 -b=128 --epsilon=0.3 --steps=40 --stepsize=0.0333333 --leverage=1
+    python train.py mnist fashionmnist -lp=TRADES-M --epochs=100 -lr=0.01 -wd=0 -mom=0.9 -b=128 --epsilon=0.3 --steps=40 --stepsize=0.0333333 --leverage=1
 
 
 
