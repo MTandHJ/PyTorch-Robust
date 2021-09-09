@@ -47,7 +47,8 @@ parser.add_argument("-b", "--batch_size", type=int, default=128)
 parser.add_argument("--transform", type=str, default='default', 
                 help="the data augmentation which will be applied during training.")
 
-parser.add_argument("--eval", action="store_true", default=False)
+parser.add_argument("--eval", action="store_true", default=False,
+                help="To evaluate the model if true ...")
 parser.add_argument("--resume", action="store_true", default=False)
 parser.add_argument("--progress", action="store_true", default=False, 
                 help="show the progress if true")
