@@ -17,12 +17,12 @@
 ### CIFAR-10
 
     python STD.py resnet32 cifar10 --epochs=200 -lp=MMC-C -b=50 --optimizer=sgd -wd=1e-4 -lr=0.01 --scale=10
-	python AT.py resnet32 cifar10 --epochs=200 -lp=MMC-C -b=50 --optimizer=sgd -wd=1e-4 -lr=0.01 --scale=10
+    python AT.py resnet32 cifar10 --epochs=200 -lp=MMC-C -b=50 --optimizer=sgd -wd=1e-4 -lr=0.01 --scale=10
 
 ### CIFAR-100
 
     python STD.py resnet32 cifar100 --epochs=200 -lp=MMC-C -b=50 --optimizer=sgd -wd=1e-4 -lr=0.01 --scale=10
-	python AT.py resnet32 cifar100 --epochs=200 -lp=MMC-C -b=50 --optimizer=sgd -wd=1e-4 -lr=0.01 --scale=10
+    python AT.py resnet32 cifar100 --epochs=200 -lp=MMC-C -b=50 --optimizer=sgd -wd=1e-4 -lr=0.01 --scale=10
 
 ### MNIST
 
@@ -36,4 +36,35 @@
 
 
 ## Evaluation
+
+
+
+### CIFAR-10
+
+
+
+| $\ell_{\infty}$ |      |   Net    |  LP   | Nat(%) | FGSM  | PGD-10 | PGD-40 | DeepFool |  AA  |
+| :-------------: | :--: | :------: | :---: | :----: | :---: | :----: | :----: | :------: | :--: |
+|      8/255      | STD  | ResNet32 | MMC-C | 90.18  | 86.33 | 84.71  | 84.31  |  34.35   | 0.00 |
+|     16/255      | STD  | ResNet32 | MMC-C | 90.18  | 86.65 | 78.22  | 77.63  |  12.50   | 0.00 |
+
+
+
+
+| $\ell_2$ |      |   Net    |  LP   | Nat(%) | PGD-50 | DeepFool | C&W  |  AA  |
+| :------: | :--: | :------: | :---: | :----: | :----: | :------: | :--: | :--: |
+|   0.5    | STD  | ResNet32 | MMC-C | 90.18  | 88.02  |          |      | 0.09 |
+|          |      |          |       |        |        |          |      |      |
+
+
+| $\ell_1$ | leverage | Net  |  LP  | Nat(%) | PGD-50 | SLIDE |
+| :------: | :------: | :--: | :--: | :----: | :----: | :---: |
+|          |          |      |      | 90.18  |        |       |
+|          |          |      |      |        |        |       |
+
+
+
+
+
+
 

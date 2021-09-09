@@ -65,3 +65,18 @@ def dotloss(
         return loss.sum()
     else:
         raise ValueError("reduction: mean or sum")
+
+def ballloss(
+    features: torch.Tensor,
+    targets: torch.Tensor,
+    labels: torch.Tensor,
+    reduction: str = "mean"
+):
+    targets = targets.clone().detach()[labels]
+    loss = (features - targets).pow(2).sum(dim=1)
+    if reduction == "mean":
+        return loss.mean()
+    elif reduction == "sum":
+        return loss.sum()
+    else:
+        raise ValueError("reduction: mean|sum")

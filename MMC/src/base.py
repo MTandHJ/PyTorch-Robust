@@ -10,7 +10,7 @@ import os
 
 from models.base import AdversarialDefensiveModule
 from .utils import AverageMeter, ProgressMeter, timemeter
-from .loss_zoo import dotloss
+from .loss_zoo import ballloss
 from .config import SAVED_FILENAME, BOUNDS, PREPROCESSING
 
 
@@ -40,8 +40,8 @@ class Coach:
         self.optimizer = optimizer
         self.learning_policy = learning_policy
         self.loss = AverageMeter("Loss")
-        self.acc = AverageMeter("Acc", fmt=".3%")
-        self.progress = ProgressMeter(self.loss, self.acc)
+        # self.acc = AverageMeter("Acc", fmt=".3%")
+        self.progress = ProgressMeter(self.loss)
         
     def save(self, path: str, filename: str = SAVED_FILENAME) -> None:
         torch.save(self.model.state_dict(), os.path.join(path, filename))
@@ -60,16 +60,16 @@ class Coach:
             labels = labels.to(self.device)
 
             self.model.train() # make sure in training mode
-            logits = self.model(inputs)
-            loss = dotloss(logits, labels, reduction="mean")
+            features, weights = self.model(inputs)
+            loss = ballloss(features, weights, labels)
 
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
 
-            accuracy_count = (logits.argmax(-1) == labels).sum().item()
+            # accuracy_count = (logits.argmax(-1) == labels).sum().item()
             self.loss.update(loss.item(), inputs.size(0), mode="mean")
-            self.acc.update(accuracy_count, inputs.size(0), mode="sum")
+            # self.acc.update(accuracy_count, inputs.size(0), mode="sum")
 
         self.progress.display(epoch=epoch) 
         self.learning_policy.step() # update the learning rate
@@ -92,16 +92,16 @@ class Coach:
             _, clipped, _ = attacker(inputs, labels)
             
             self.model.train()
-            logits = self.model(clipped)
-            loss = dotloss(logits, labels, reduction="mean")
+            features, weights = self.model(clipped)
+            loss = ballloss(features, weights, labels)
 
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
 
-            accuracy_count = (logits.argmax(-1) == labels).sum().item()
+            # accuracy_count = (logits.argmax(-1) == labels).sum().item()
             self.loss.update(loss.item(), inputs.size(0), mode="mean")
-            self.acc.update(accuracy_count, inputs.size(0), mode="sum")
+            # self.acc.update(accuracy_count, inputs.size(0), mode="sum")
 
         self.progress.display(epoch=epoch)
         self.learning_policy.step() # update the learning rate

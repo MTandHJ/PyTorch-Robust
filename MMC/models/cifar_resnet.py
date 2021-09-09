@@ -216,8 +216,10 @@ class ResNet(ADArch):
 
         x = self.avgpool(x) # 512 x 1 x 1
         features = torch.flatten(x, 1) # N x 1 x 512
-        features = self.dense(features).unsqueeze(dim=1)
-        logits = -(features - self.fc.weight).pow(2).sum(dim=-1) # N x K
+        features = self.dense(features)
+        if self.training:
+            return features, self.fc.weight
+        logits = self.fc(features) * 2
         return logits
 
 

@@ -66,7 +66,7 @@ class ResNet(ADArch):
 
         self.avg_pool = nn.AdaptiveAvgPool2d((1, 1))
         self.dense = nn.Linear(64, 64)
-        self.fc = nn.Linear(64, num_classes)
+        self.fc = nn.Linear(64, num_classes, bias=False)
         
 
         for m in self.modules():
@@ -103,8 +103,10 @@ class ResNet(ADArch):
         l3 = self.layer3(l2)
         
         features = self.avg_pool(l3).flatten(start_dim=1)
-        features = self.dense(features).unsqueeze(dim=1)
-        logits = -(features - self.fc.weight).pow(2).sum(dim=-1) # N x K
+        features = self.dense(features)
+        if self.training:
+            return features, self.fc.weight
+        logits = self.fc(features) * 2
         return logits
 
 

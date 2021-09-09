@@ -108,8 +108,10 @@ class WideResNet(ADArch):
         x = self.block3(x)
         x = self.relu(self.bn1(x))
         features = self.avg_pool(x).flatten(start_dim=1)
-        features = self.dense(features).unsqueeze(dim=1)
-        logits = -(features - self.fc.weight).pow(2).sum(dim=-1) # N x K
+        features = self.dense(features)
+        if self.training:
+            return features, self.fc.weight
+        logits = self.fc(features) * 2
         return logits
         
 
