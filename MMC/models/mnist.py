@@ -35,7 +35,7 @@ class MNIST(ADArch):
             nn.Linear(200, dim_feature)
         )
         self.activation = nn.ReLU(True)
-        self.dense = nn.Linear(dim_feature, dim_feature)
+        self.linear = nn.Linear(dim_feature, dim_feature)
         self.fc = nn.Linear(dim_feature, num_classes, bias=False)
 
         for m in self.modules():
@@ -59,6 +59,6 @@ class MNIST(ADArch):
     def forward(self, x):
         x = self.conv(x).flatten(start_dim=1)
         features = self.activation(self.dense(x))
-        features = self.dense(features).unsqueeze(dim=1)
+        features = self.linear(features).unsqueeze(dim=1)
         logits = -(features - self.fc.weight).pow(2).sum(dim=-1)
         return logits

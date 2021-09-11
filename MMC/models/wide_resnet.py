@@ -79,7 +79,7 @@ class WideResNet(ADArch):
         self.bn1 = nn.BatchNorm2d(nChannels[3])
         self.relu = nn.ReLU(inplace=True)
         self.avg_pool = nn.AdaptiveAvgPool2d((1, 1))
-        self.dense = nn.Linear(nChannels[3], nChannels[3])
+        self.linear = nn.Linear(nChannels[3], nChannels[3])
         self.fc = nn.Linear(nChannels[3], num_classes, bias=False)
         self.nChannels = nChannels[3]
 
@@ -108,7 +108,7 @@ class WideResNet(ADArch):
         x = self.block3(x)
         x = self.relu(self.bn1(x))
         features = self.avg_pool(x).flatten(start_dim=1)
-        features = self.dense(features).unsqueeze(dim=1)
+        features = self.linear(features).unsqueeze(dim=1)
         logits = -(features - self.fc.weight).pow(2).sum(dim=-1)
         return logits
         

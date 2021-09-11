@@ -152,7 +152,7 @@ class ResNet(ADArch):
                                        dilate=replace_stride_with_dilation[2])
 
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
-        self.dense = nn.Linear(512 * block.expansion, 512 * block.expansion)
+        self.linear = nn.Linear(512 * block.expansion, 512 * block.expansion)
         self.fc = nn.Linear(512 * block.expansion, num_classes, bias=False)
 
 
@@ -216,7 +216,7 @@ class ResNet(ADArch):
 
         x = self.avgpool(x) # 512 x 1 x 1
         features = torch.flatten(x, 1) # N x 1 x 512
-        features = self.dense(features).unsqueeze(dim=1)
+        features = self.linear(features).unsqueeze(dim=1)
         logits = -(features - self.fc.weight).pow(2).sum(dim=-1)
         return logits
 
