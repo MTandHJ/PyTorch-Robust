@@ -225,6 +225,7 @@ if __name__ ==  "__main__":
     from torch.utils.tensorboard import SummaryWriter
     from src.utils import readme
     cfg = load_cfg()
+    opts.log_path = cfg.log_path
     readme(cfg.info_path, opts)
     readme(cfg.log_path, opts, mode="a")
     writter = SummaryWriter(log_dir=cfg.log_path, filename_suffix=METHOD)
