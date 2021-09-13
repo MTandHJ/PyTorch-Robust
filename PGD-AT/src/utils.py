@@ -146,6 +146,7 @@ class ImageMeter:
             titles=(title,),
             dpi=300
         )
+        self.fp.set_style('no-latex')
         # self.fp.set_label("Val", axis='y')
         # self.fp.set_label("T", axis='x')
         self.fp.set_title(y=1.)
