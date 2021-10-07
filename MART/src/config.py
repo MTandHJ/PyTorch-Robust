@@ -137,6 +137,22 @@ LEARNING_POLICY = {
             prefix="Default leaning policy will be applied:"
         )
     ),
+    "MART": (
+        "MultiStepLR",
+        Config(
+            milestones=[75, 90],
+            gamma=0.1,
+            prefix="MART leaning policy, an official config:"
+        )
+    ),
+    "MART-M": (
+        "MultiStepLR",
+        Config(
+            milestones=[20, 40],
+            gamma=0.1,
+            prefix="MART leaning policy, an official config:"
+        )
+    ),
     "null": (
         "StepLR",
         Config(

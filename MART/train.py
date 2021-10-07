@@ -8,16 +8,19 @@ from src.utils import timemeter
 
 
 
-METHOD = "AT"
+METHOD = "MART"
 SAVE_FREQ = 5
 PRINT_FREQ = 20
-FMT = "{description}={learning_policy}-{optimizer}-{lr}" \
+FMT = "{description}={leverage}={learning_policy}-{optimizer}-{lr}" \
         "={attack}-{epsilon:.4f}-{stepsize}-{steps}" \
         "={batch_size}={transform}"
 
 parser = argparse.ArgumentParser()
 parser.add_argument("model", type=str)
 parser.add_argument("dataset", type=str)
+
+parser.add_argument("--leverage", type=float, default=5.,
+                help="the alias of beta ...")
 
 # adversarial training settings
 parser.add_argument("--attack", type=str, default="pgd-linf")
@@ -27,7 +30,6 @@ parser.add_argument("--stepsize", type=float, default=0.25,
 parser.add_argument("--steps", type=int, default=10)
 
 # basic settings
-parser.add_argument("--loss", type=str, default="cross_entropy")
 parser.add_argument("--optimizer", type=str, choices=("sgd", "adam"), default="sgd")
 parser.add_argument("-mom", "--momentum", type=float, default=0.9,
                 help="the momentum used for SGD")
@@ -35,12 +37,12 @@ parser.add_argument("-beta1", "--beta1", type=float, default=0.9,
                 help="the first beta argument for Adam")
 parser.add_argument("-beta2", "--beta2", type=float, default=0.999,
                 help="the second beta argument for Adam")
-parser.add_argument("-wd", "--weight_decay", type=float, default=5e-4,
+parser.add_argument("-wd", "--weight_decay", type=float, default=3.5e-3,
                 help="weight decay")
-parser.add_argument("-lr", "--lr", "--LR", "--learning_rate", type=float, default=0.1)
-parser.add_argument("-lp", "--learning_policy", type=str, default="default", 
+parser.add_argument("-lr", "--lr", "--LR", "--learning_rate", type=float, default=0.01)
+parser.add_argument("-lp", "--learning_policy", type=str, default="MART", 
                 help="learning rate schedule defined in config.py")
-parser.add_argument("--epochs", type=int, default=100)
+parser.add_argument("--epochs", type=int, default=120)
 parser.add_argument("-b", "--batch_size", type=int, default=128)
 parser.add_argument("--transform", type=str, default='default', 
                 help="the data augmentation which will be applied during training.")
@@ -55,7 +57,7 @@ parser.add_argument("--log2file", action="store_false", default=True,
 parser.add_argument("--log2console", action="store_false", default=True,
                 help="False: remove console handler if log2file is True ...")
 parser.add_argument("--seed", type=int, default=1)
-parser.add_argument("-m", "--description", type=str, default="AT")
+parser.add_argument("-m", "--description", type=str, default="MART")
 opts = parser.parse_args()
 opts.description = FMT.format(**opts.__dict__)
 
@@ -135,7 +137,7 @@ def load_cfg() -> Tuple[Config, str]:
 
     cfg['coach'] = Coach(
         model=model, device=device, 
-        loss_func=load_loss_func(opts.loss), 
+        loss_func=None,
         optimizer=optimizer, 
         learning_policy=learning_policy
     )
@@ -218,7 +220,7 @@ def main(
             )
             
 
-        running_loss = coach.adv_train(trainloader, attacker, epoch=epoch)
+        running_loss = coach.train(trainloader, attacker, epoch=epoch)
         writter.add_scalar("Loss", running_loss, epoch)
 
 
