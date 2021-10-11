@@ -4,6 +4,7 @@ from typing import Tuple
 import torch
 import argparse
 from src.loadopts import *
+from src.config import SAVED_FILENAME
 from autoattack import AutoAttack
 
 
@@ -16,6 +17,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("model", type=str)
 parser.add_argument("dataset", type=str)
 parser.add_argument("info_path", type=str)
+parser.add_argument("--filename", type=str, default=SAVED_FILENAME)
 
 # for AA
 parser.add_argument("--norm", choices=("Linf", "L2"), default="Linf")
@@ -60,6 +62,7 @@ def load_cfg() -> Tuple[Config, str]:
     load(
         model=model, 
         path=opts.info_path,
+        filename=opts.filename,
         device=device
     )
     model.eval()
@@ -67,7 +70,7 @@ def load_cfg() -> Tuple[Config, str]:
     # load the testset
     testset = load_dataset(
         dataset_type=opts.dataset, 
-        transform='None',
+        transform='null',
         train=False
     )
     data = []

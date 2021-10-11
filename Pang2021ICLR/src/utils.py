@@ -7,7 +7,7 @@ from typing import Optional, Any, Union, List, NoReturn, Dict
 import torch
 import torch.nn as nn
 import numpy as np
-import matplotlib.pyplot as plt
+from freeplot.base import FreePlot
 
 import logging
 import time
@@ -137,34 +137,34 @@ class ImageMeter:
     def __init__(
         self, *meters: TrackMeter, title: str = ""
     ):
-        from freeplot.base import FreePlot
         self.meters = list(meters)
         self.title = title
-        self.fp = FreePlot(
-            shape=(1, 1),
-            figsize=(2.2, 2),
-            titles=(title,),
-            dpi=300
-        )
-        self.fp.set_style('no-latex')
-        # self.fp.set_label("Val", axis='y')
-        # self.fp.set_label("T", axis='x')
-        self.fp.set_title(y=1.)
+        
 
     def add(self, *meters: TrackMeter) -> None:
         self.meters += list(meters)
 
     def plot(self) -> None:
+        self.fp = FreePlot(
+            shape=(1, 1),
+            figsize=(2.2, 2),
+            titles=(self.title,),
+            dpi=300
+        )
+        self.fp.set_style('no-latex')
+        # self.fp.set_label("Val", axis='y')
+        # self.fp.set_label("T", axis='x')
+        self.fp.set_title(y=.98)
         for meter in self.meters:
             x = meter.timeline
             y = meter.history
             self.fp.lineplot(x, y, label=meter.name)
         self.fp[0, 0].legend()
-        plt.tight_layout()
     
-    def save(self, writter: 'SummaryWriter', postfix: str = '') -> None:
-        filename = f"{self.title}{postfix}"
-        writter.add_figure(filename, self.fp.fig)
+    def save(self, path: str, postfix: str = '') -> None:
+        filename = f"{self.title}{postfix}.png"
+        _file = os.path.join(path, filename)
+        self.fp.savefig(_file)
 
 
 

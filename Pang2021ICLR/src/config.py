@@ -33,8 +33,10 @@ class _GaussBlur:
 
 
 
-ROOT = "../../data" # the path saving the data
+ROOT = "../data" # the path saving the data
 SAVED_FILENAME = "paras.pt" # the filename of saved model paramters
+PRE_BESTNAT = "nat"
+PRE_BESTROB = "rob"
 INFO_PATH = "./infos/{method}/{dataset}-{model}/{description}"
 LOG_PATH = "./logs/{method}/{dataset}-{model}/{description}-{time}"
 TIMEFMT = "%m%d%H"
@@ -48,6 +50,9 @@ LOGGER = Config(
         consolehandler=logging.Formatter('%(message)s')
     )
 )
+
+# the seed for validloader preparation
+VALIDSEED = 1
 
 
 TRANSFORMS = {
@@ -64,14 +69,6 @@ TRANSFORMS = {
             T.RandomHorizontalFlip(),
             T.ToTensor()
         )),
-        'simclr': T.Compose((
-            T.RandomResizedCrop(32, scale=(0.2, 1.0)),
-            T.RandomApply([T.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8),
-            T.RandomGrayscale(p=0.2),
-            T.RandomApply([_GaussBlur()], p=0.5),
-            T.RandomHorizontalFlip(),
-            T.ToTensor()
-        ))
     },
     "cifar100": {
         'default': T.Compose((
@@ -80,16 +77,10 @@ TRANSFORMS = {
             T.RandomHorizontalFlip(),
             T.ToTensor()
         )),
-        'simclr': T.Compose((
-            T.RandomResizedCrop(32, scale=(0.2, 1.0)),
-            T.RandomApply([T.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8),
-            T.RandomGrayscale(p=0.2),
-            T.RandomApply([_GaussBlur()], p=0.5),
-            T.RandomHorizontalFlip(),
-            T.ToTensor()
-        ))
     }
 }
+for dst in TRANSFORMS.values():
+    dst['null'] = T.ToTensor()
 
 VALIDER = {
     "mnist": (Config(attack_type="pgd-linf", stepsize=0.033333, steps=100), 0.3),
@@ -134,7 +125,7 @@ LEARNING_POLICY = {
         Config(
             milestones=[100, 105],
             gamma=0.1,
-            prefix="Baseline leaning policy will be applied:"
+            prefix="Default leaning policy will be applied:"
         )
     ),
     "null": (
@@ -143,6 +134,46 @@ LEARNING_POLICY = {
             step_size=9999999999999,
             gamma=1,
             prefix="Null leaning policy will be applied:"
+        )
+    ),
+    "STD": (
+        "MultiStepLR",
+        Config(
+            milestones=[82, 123],
+            gamma=0.1,
+            prefix="STD leaning policy will be applied:"
+        )
+    ),
+    "STD-wrn": (
+        "MultiStepLR",
+        Config(
+            milestones=[60, 120, 160],
+            gamma=0.2,
+            prefix="STD-wrn leaning policy will be applied:"
+        )
+    ),
+    "AT":(
+        "MultiStepLR",
+        Config(
+            milestones=[102, 154],
+            gamma=0.1,
+            prefix="AT learning policy, an official config:"
+        )
+    ),
+    "TRADES":(
+        "MultiStepLR",
+        Config(
+            milestones=[75, 90, 100],
+            gamma=0.1,
+            prefix="TRADES learning policy, an official config:"
+        )
+    ),
+    "TRADES-M":(
+        "MultiStepLR",
+        Config(
+            milestones=[55, 75, 90],
+            gamma=0.1,
+            prefix="TRADES learning policy, an official config for MNIST:"
         )
     ),
     "cosine":(   

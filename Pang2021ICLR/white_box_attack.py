@@ -5,16 +5,18 @@ import torch
 import argparse
 from src.loadopts import *
 from src.utils import timemeter
+from src.config import SAVED_FILENAME
 
 
 METHOD = "WhiteBox"
-FMT = "{description}={attack}-{epsilon_min}-{epsilon_max}-{epsilon_times}-{stepsize}-{steps}"
+FMT = "{description}={attack}-{epsilon_min:.4f}-{epsilon_max}-{epsilon_times}-{stepsize}-{steps}"
 
 
 parser = argparse.ArgumentParser()
 parser.add_argument("model", type=str)
 parser.add_argument("dataset", type=str)
 parser.add_argument("info_path", type=str)
+parser.add_argument("--filename", type=str, default=SAVED_FILENAME)
 
 # adversarial settings
 parser.add_argument("--attack", type=str, default="pgd-linf")
@@ -27,8 +29,6 @@ parser.add_argument("--steps", type=int, default=20)
 
 # basic settings
 parser.add_argument("-b", "--batch_size", type=int, default=256)
-parser.add_argument("--transform", type=str, default='default', 
-                help="the data augmentation which will be applied in training mode.")
 parser.add_argument("--progress", action="store_false", default=True, 
                 help="show the progress if true")
 parser.add_argument("--log2file", action="store_false", default=True,
@@ -72,13 +72,14 @@ def load_cfg() -> 'Config':
     load(
         model=model, 
         path=opts.info_path,
+        filename=opts.filename,
         device=device
     )
 
     # load the testset
     testset = load_dataset(
         dataset_type=opts.dataset,
-        transform=opts.transform,
+        transform='null',
         train=False
     )
     cfg['testloader'] = load_dataloader(

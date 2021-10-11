@@ -10,7 +10,6 @@ from src.utils import timemeter
 
 METHOD = "AT"
 SAVE_FREQ = 5
-PRINT_FREQ = 20
 FMT = "{description}={learning_policy}-{optimizer}-{lr}" \
         "={attack}-{epsilon:.4f}-{stepsize}-{steps}" \
         "={batch_size}={transform}"
@@ -45,8 +44,16 @@ parser.add_argument("-b", "--batch_size", type=int, default=128)
 parser.add_argument("--transform", type=str, default='default', 
                 help="the data augmentation which will be applied during training.")
 
-parser.add_argument("--eval", action="store_true", default=False,
-                help="To evaluate the model if true ...")
+# the ratio of valid dataset
+parser.add_argument("--ratio", type=float, default=.0,
+                help="the ratio of validation; use testset if ratio is 0.")
+
+# eval
+parser.add_argument("--eval-train", action="store_true", default=False)
+parser.add_argument("--eval-valid", action="store_false", default=True)
+parser.add_argument("--eval-freq", type=int, default=5,
+                help="for valid dataset only")
+
 parser.add_argument("--resume", action="store_true", default=False)
 parser.add_argument("--progress", action="store_true", default=False, 
                 help="show the progress if true")
@@ -75,7 +82,7 @@ def load_cfg() -> Tuple[Config, str]:
         model=opts.model, description=opts.description
     )
     # set logger
-    set_logger(
+    logger = set_logger(
         path=cfg.log_path, 
         log2file=opts.log2file, 
         log2console=opts.log2console
@@ -94,24 +101,29 @@ def load_cfg() -> Tuple[Config, str]:
         transform=opts.transform, 
         train=True
     )
-    cfg['trainloader'] = load_dataloader(
+    cfg['trainloader'], cfg['validloader'] = load_dataloader(
         dataset=trainset, 
         batch_size=opts.batch_size, 
         train=True,
+        ratio=opts.ratio,
         show_progress=opts.progress
     )
-    validset = load_dataset(
-        dataset_type=opts.dataset,
-        transform=opts.transform,
-        train=False
-    )
-    cfg['validloader'] = load_dataloader(
-        dataset=validset, 
-        batch_size=opts.batch_size, 
-        train=False,
-        show_progress=opts.progress
-    )
-    
+    if opts.ratio == 0:
+        logger.warning(
+            "[Warning] The ratio of validation is 0. Use testset instead."
+        )
+        testset = load_dataset(
+            dataset_type=opts.dataset,
+            transform='null',
+            train=False
+        )
+        cfg['validloader'] = load_dataloader(
+            dataset=testset,
+            batch_size=opts.batch_size,
+            train=False,
+            show_progress=opts.progress
+        )
+
     # load the optimizer and learning_policy
     optimizer = load_optimizer(
         model=model, optim_type=opts.optimizer, lr=opts.lr,
@@ -159,26 +171,31 @@ def load_cfg() -> Tuple[Config, str]:
     return cfg
 
 
-@timemeter("Evaluation")
-def evaluate(
-    valider, trainloader, validloader,
-    acc_logger, rob_logger, 
-    logger, writter, log_path,
-    epoch = 8888
-):
-    train_acc_nat, train_acc_adv = valider.evaluate(trainloader)
-    valid_acc_nat, valid_acc_adv = valider.evaluate(validloader)
+def preparation(valider):
+    from src.utils import TrackMeter, ImageMeter, getLogger
+    from src.dict2obj import Config
+    logger = getLogger()
+    acc_logger = Config(
+        train=TrackMeter("Train"),
+        valid=TrackMeter("Valid")
+    )
+    rob_logger = Config(
+        train=TrackMeter("Train"),
+        valid=TrackMeter("Valid")
+    )
 
-    logger.info(f"Train >>> [TA: {train_acc_nat:.3%}]    [RA: {train_acc_adv:.3%}]")
-    logger.info(f"Test. >>> [TA: {valid_acc_nat:.3%}]    [RA: {valid_acc_adv:.3%}]")
-    writter.add_scalars("Accuracy", {"train":train_acc_nat, "valid":valid_acc_nat}, epoch)
-    writter.add_scalars("Robustness", {"train":train_acc_adv, "valid":valid_acc_adv}, epoch)
+    acc_logger.plotter = ImageMeter(*acc_logger.values(), title="Accuracy")
+    rob_logger.plotter = ImageMeter(*rob_logger.values(), title="Robustness")
 
-    acc_logger.train(data=train_acc_nat, T=epoch)
-    acc_logger.valid(data=valid_acc_nat, T=epoch)
-    rob_logger.train(data=train_acc_adv, T=epoch)
-    rob_logger.valid(data=valid_acc_adv, T=epoch)
+    @timemeter("Evaluation")
+    def evaluate(dataloader, prefix='Valid', epoch=8888):
+        acc_nat, acc_adv = valider.evaluate(dataloader)
+        logger.info(f"{prefix} >>> [TA: {acc_nat:.3%}]    [RA: {acc_adv:.3%}]")
+        getattr(acc_logger, prefix.lower())(data=acc_nat, T=epoch)
+        getattr(rob_logger, prefix.lower())(data=acc_adv, T=epoch)
+        return acc_nat, acc_adv
 
+    return acc_logger, rob_logger, evaluate
 
 
 @timemeter("Main")
@@ -187,67 +204,50 @@ def main(
     trainloader, validloader, start_epoch, 
     info_path, log_path
 ):  
-    from src.utils import save_checkpoint, TrackMeter, ImageMeter, getLogger
-    from src.dict2obj import Config
-    logger = getLogger()
-    acc_logger = Config(
-        train=TrackMeter("Train"),
-        valid=TrackMeter("Valid")
-    )
-    acc_logger.plotter = ImageMeter(*acc_logger.values(), title="Accuracy")
 
-    rob_logger = Config(
-        train=TrackMeter("Train"),
-        valid=TrackMeter("Valid")
-    )
-    rob_logger.plotter = ImageMeter(*rob_logger.values(), title="Robustness")
+    from src.utils import save_checkpoint
 
+    # preparation
+    acc_logger, rob_logger, evaluate = preparation(valider)
 
     for epoch in range(start_epoch, opts.epochs):
 
         if epoch % SAVE_FREQ == 0:
             save_checkpoint(info_path, coach.model, coach.optimizer, coach.learning_policy, epoch)
 
-        if epoch % PRINT_FREQ == 0 and opts.eval:
-            evaluate(
-                valider=valider,
-                trainloader=trainloader, validloader=validloader,
-                acc_logger=acc_logger, rob_logger=rob_logger, 
-                logger=logger, writter=writter,
-                log_path=log_path, epoch=epoch
-            )
-            
+        if epoch % opts.eval_freq == 0:
+            if opts.eval_train:
+                evaluate(trainloader, prefix='Train', epoch=epoch)
+            if opts.eval_valid:
+                acc_nat, acc_rob = evaluate(validloader, prefix="Valid", epoch=epoch)
+                coach.check_best(acc_nat, acc_rob, info_path, epoch=epoch)
 
         running_loss = coach.adv_train(trainloader, attacker, epoch=epoch)
-        writter.add_scalar("Loss", running_loss, epoch)
 
+    # save the model
+    coach.save(info_path)
 
-    evaluate(
-        valider=valider,
-        trainloader=trainloader, validloader=validloader,
-        acc_logger=acc_logger, rob_logger=rob_logger, 
-        logger=logger, writter=writter,
-        log_path=log_path, epoch=opts.epochs
-    )
+    # final evaluation
+    evaluate(trainloader, prefix='Train', epoch=opts.epochs)
+    acc_nat, acc_rob = evaluate(validloader, prefix="Valid", epoch=opts.epochs)
+    coach.check_best(acc_nat, acc_rob, info_path, epoch=opts.epochs) 
 
     acc_logger.plotter.plot()
     rob_logger.plotter.plot()
-    acc_logger.plotter.save(writter)
-    rob_logger.plotter.save(writter)
+    acc_logger.plotter.save(log_path)
+    rob_logger.plotter.save(log_path)
+
+
 
 
 if __name__ ==  "__main__":
-    from torch.utils.tensorboard import SummaryWriter
     from src.utils import readme
     cfg = load_cfg()
     opts.log_path = cfg.log_path
     readme(cfg.info_path, opts)
     readme(cfg.log_path, opts, mode="a")
-    writter = SummaryWriter(log_dir=cfg.log_path, filename_suffix=METHOD)
 
     main(**cfg)
 
-    cfg['coach'].save(cfg.info_path)
-    writter.close()
 
 
