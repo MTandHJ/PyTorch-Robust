@@ -48,7 +48,7 @@ class Coach:
         torch.save(self.model.state_dict(), os.path.join(path, filename))
 
     @timemeter("MART/Epoch")
-    def adv_train(
+    def train(
         self, 
         trainloader: Iterable[Tuple[torch.Tensor, torch.Tensor]], 
         attacker: "Adversary", 
