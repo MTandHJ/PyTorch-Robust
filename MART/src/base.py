@@ -65,7 +65,7 @@ class Coach:
             
             self.model.train()
             logits_nat = self.model(inputs)
-            logits_adv = self.model(inputs)
+            logits_adv = self.model(clipped)
             loss = mart_loss(logits_nat, logits_adv, labels, leverage=leverage)
 
             self.optimizer.zero_grad()
