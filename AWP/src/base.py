@@ -89,7 +89,7 @@ class Coach:
         diff_dict = dict()
         model_state_dict = self.model.state_dict()
         proxy_state_dict = self.proxy.state_dict()
-        for (old_k, old_w), (new_k, new_w) in zip(model_state_dict.items(), proxy_state_dict.item()):
+        for (old_k, old_w), (new_k, new_w) in zip(model_state_dict.items(), proxy_state_dict.items()):
             if len(old_w.size()) < 1:
                 continue
             if 'weight' in old_k:
