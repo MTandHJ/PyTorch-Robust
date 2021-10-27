@@ -150,14 +150,12 @@ class ImageMeter:
             titles=(self.title,),
             dpi=300
         )
-        self.fp.set_style('no-latex')
-        # self.fp.set_label("Val", axis='y')
-        # self.fp.set_label("T", axis='x')
         self.fp.set_title(y=.98)
         for meter in self.meters:
             x = meter.timeline
             y = meter.history
             self.fp.lineplot(x, y, label=meter.name)
+        self.fp.set_style('no-latex')
         self.fp[0, 0].legend()
     
     def save(self, path: str, postfix: str = '') -> None:
