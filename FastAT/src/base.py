@@ -172,7 +172,10 @@ class AdversaryForTrain(Adversary):
         epsilon: Optional[float] = None
     ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
 
-        return super(AdversaryForTrain, self).attack(inputs, criterion, epsilon)
+        if epsilon is None:
+            epsilon = self.epsilon
+        self.model.train() # FastAT crafts adversarial samples in training mode !!!
+        return self.attacker(self.fmodel, inputs, criterion, epsilons=epsilon)
 
 
 class AdversaryForValid(Adversary): 

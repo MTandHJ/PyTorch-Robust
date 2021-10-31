@@ -1,11 +1,13 @@
 
 
-## FastAT
+## FastAT (FGSM-RS)
 
 
 > [Wong E., Rice L., Kolter J.Z. Fast is better than free: revisiting adversarial training. In International Conference on Learning Representations (ICLR), 2020.](http://arxiv.org/abs/2001.03994)
 
-**Note:** This implementation excludes the apex module to speed up. In addition, there are some differences for training MNIST and FashionMNIST (the learning policy actually).
+**Note:** This implementation excludes the apex module. In addition, there are some differences for training MNIST and FashionMNIST (the learning policy actually).
+
+**Note:** FastAT (FGSM-RS) crafts the adversarial samples in training mode !!!
 
 You may prefer the official codes:
 
