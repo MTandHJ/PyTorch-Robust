@@ -16,7 +16,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("model", type=str)
 parser.add_argument("dataset", type=str)
 parser.add_argument("info_path", type=str)
-parser.add_argument("--filename", type=str, default=SAVED_FILENAME)
+parser.add_argument("--filename", type=str, default='rob_paras.pt')
 
 # adversarial settings
 parser.add_argument("--attack", type=str, default="pgd-linf")

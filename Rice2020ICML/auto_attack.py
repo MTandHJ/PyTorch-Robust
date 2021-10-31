@@ -17,7 +17,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("model", type=str)
 parser.add_argument("dataset", type=str)
 parser.add_argument("info_path", type=str)
-parser.add_argument("--filename", type=str, default=SAVED_FILENAME)
+parser.add_argument("--filename", type=str, default='rob_paras.pt')
 
 # for AA
 parser.add_argument("--norm", choices=("Linf", "L2"), default="Linf")
