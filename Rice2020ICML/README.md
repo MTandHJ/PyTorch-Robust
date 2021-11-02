@@ -22,3 +22,14 @@
 
 
 ## Evaluation
+
+
+
+We report the best checkpoint on the validation set.
+
+
+
+| $\epsilon$ |   Net    |      LP      | Nat(%) | PGD-40 |  AA   |
+| :--------: | :------: | :----------: | :----: | :----: | :---: |
+|   8/255    | resnet18 | Rice2020ICML | 82.09  | 52.05  | 47.86 |
+

@@ -13,7 +13,6 @@ You may prefer the official codes:
 
 > [Official-Code](https://github.com/locuslab/fast_adversarial)
 
-
 ### CIFAR-10
 
     python train.py preact18 cifar10 -lp=Fast --epochs=15 -b=128 -wd=5e-4 --lr-min=0 --lr-max=0.2
@@ -33,4 +32,10 @@ You may prefer the official codes:
 
 
 ## Evaluation
+
+
+
+| $\epsilon$ |   Net    |  LP  | Nat(%) | PGD-40 |  AA   |
+| :--------: | :------: | :--: | :----: | :----: | :---: |
+|   8/255    | resnet18 | Fast | 77.70  | 45.62  | 41.35 |
 
