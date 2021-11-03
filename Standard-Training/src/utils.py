@@ -164,7 +164,7 @@ class ImageMeter:
         _file = os.path.join(path, filename)
         self.fp.savefig(_file)
 
-def gpu(*models: nn.Module) -> List[torch.device, nn.Module]:
+def gpu(*models: nn.Module) -> List:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     return_ = [device]
     for model in models:
