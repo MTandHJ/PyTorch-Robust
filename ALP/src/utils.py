@@ -7,17 +7,17 @@ from typing import Optional, Any, Union, List, NoReturn, Dict
 import torch
 import torch.nn as nn
 import numpy as np
-import matplotlib.pyplot as plt
+from freeplot.base import FreePlot
 
 import logging
 import time
 import random
 import os
-import sys
 import copy
 import pickle
 
 from .config import SAVED_FILENAME, LOGGER
+from models.base import DataParallel
 
 
 
@@ -137,46 +137,42 @@ class ImageMeter:
     def __init__(
         self, *meters: TrackMeter, title: str = ""
     ):
-        from freeplot.base import FreePlot
         self.meters = list(meters)
         self.title = title
-        self.fp = FreePlot(
-            shape=(1, 1),
-            figsize=(2.2, 2),
-            titles=(title,),
-            dpi=300
-        )
-        self.fp.set_style('no-latex')
-        # self.fp.set_label("Val", axis='y')
-        # self.fp.set_label("T", axis='x')
-        self.fp.set_title(y=1.)
+        
 
     def add(self, *meters: TrackMeter) -> None:
         self.meters += list(meters)
 
     def plot(self) -> None:
+        self.fp = FreePlot(
+            shape=(1, 1),
+            figsize=(2.2, 2),
+            titles=(self.title,),
+            dpi=300
+        )
+        self.fp.set_style('no-latex')
         for meter in self.meters:
             x = meter.timeline
             y = meter.history
             self.fp.lineplot(x, y, label=meter.name)
+        self.fp.set_title(y=.98)
         self.fp[0, 0].legend()
-        plt.tight_layout()
     
-    def save(self, writter: 'SummaryWriter', postfix: str = '') -> None:
-        filename = f"{self.title}{postfix}"
-        writter.add_figure(filename, self.fp.fig)
+    def save(self, path: str, postfix: str = '') -> None:
+        filename = f"{self.title}{postfix}.png"
+        _file = os.path.join(path, filename)
+        self.fp.savefig(_file)
 
-
-
-def gpu(*models: nn.Module) -> torch.device:
-
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+def gpu(*models: nn.Module) -> List[torch.device, nn.Module]:
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    return_ = [device]
     for model in models:
         if torch.cuda.device_count() > 1:
-            model = nn.DataParallel(model)
+            return_.append(DataParallel(model))
         else:
-            model.to(device)
-    return device
+            return_.append(model.to(device))
+    return return_
 
 def mkdirs(*paths: str) -> None:
     for path in paths:

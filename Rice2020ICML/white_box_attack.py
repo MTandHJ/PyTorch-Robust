@@ -16,14 +16,14 @@ parser = argparse.ArgumentParser()
 parser.add_argument("model", type=str)
 parser.add_argument("dataset", type=str)
 parser.add_argument("info_path", type=str)
-parser.add_argument("--filename", type=str, default='rob_paras.pt')
+parser.add_argument("--filename", type=str, default=SAVED_FILENAME)
 
 # adversarial settings
 parser.add_argument("--attack", type=str, default="pgd-linf")
 parser.add_argument("--epsilon_min", type=float, default=8/255)
 parser.add_argument("--epsilon_max", type=float, default=1.)
 parser.add_argument("--epsilon_times", type=int, default=1)
-parser.add_argument("--stepsize", type=float, default=0.1, 
+parser.add_argument("--stepsize", type=float, default=0.25, 
                     help="pgd:rel_stepsize, cwl2:step_size, deepfool:overshoot, bb:lr")
 parser.add_argument("--steps", type=int, default=20)
 
@@ -69,7 +69,7 @@ def load_cfg() -> 'Config':
     # load the model
     model = load_model(opts.model)(num_classes=get_num_classes(opts.dataset))
     model.set_normalizer(load_normalizer(opts.dataset))
-    device = gpu(model)
+    device, model = gpu(model)
     load(
         model=model, 
         path=opts.info_path,

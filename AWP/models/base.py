@@ -48,20 +48,22 @@ class ADArch(AdversarialDefensiveModule):
             raise AttributeError(errors)
         return super().__call__(inputs, **kwargs)
 
+class DataParallel(nn.DataParallel, AdversarialDefensiveModule): ...
 
 
 if __name__ == "__main__":
     
-    model = AdversarialDefensiveModule()
+    model = ADArch()
     model.child1 = AdversarialDefensiveModule()
     model.child2 = AdversarialDefensiveModule()
+    model = DataParallel(model)
 
-    print(model.attack)
-    model.attack()
+    print(model.attacking)
+    model.attack(True)
     for m in model.children():
         print(m.attacking)
 
-    model.defense()
+    model.defend(False)
     for m in model.children():
-        print(m.attacking)
+        print(m.defending)
 

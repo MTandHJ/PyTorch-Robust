@@ -84,7 +84,7 @@ def load_cfg() -> Tuple[Config, str]:
         scale=opts.scale
     )
     model.set_normalizer(load_normalizer(opts.dataset))
-    device = gpu(model)
+    device, model = gpu(model)
 
 
     # load the dataset

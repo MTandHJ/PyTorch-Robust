@@ -101,7 +101,7 @@ def load_cfg() -> Tuple[Config, str]:
     # the model and other settings for training
     model = load_model(opts.model)(num_classes=get_num_classes(opts.dataset))
     model.set_normalizer(load_normalizer(opts.dataset))
-    device = gpu(model)
+    device, model = gpu(model)
 
     # load the dataset
     trainset, validset = load_dataset(

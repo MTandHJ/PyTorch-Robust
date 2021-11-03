@@ -32,7 +32,7 @@ parser.add_argument("--log2file", action="store_false", default=True,
 parser.add_argument("--log2console", action="store_false", default=True,
                 help="False: remove console handler if log2file is True ...")
 parser.add_argument("--seed", type=int, default=1)
-parser.add_argument("-m", "--description", type=str, default="attack")
+parser.add_argument("-m", "--description", type=str, default=METHOD)
 opts = parser.parse_args()
 opts.description = FMT.format(**opts.__dict__)
 
@@ -60,7 +60,7 @@ def load_cfg() -> Tuple[Config, str]:
     # load the model
     model = load_model(opts.model)(num_classes=get_num_classes(opts.dataset))
     model.set_normalizer(load_normalizer(opts.dataset))
-    device = gpu(model)
+    device, model = gpu(model)
     load(
         model=model, 
         path=opts.info_path,
@@ -103,14 +103,11 @@ def main(attacker, data, targets):
 
 
 if __name__ == "__main__":
-    from torch.utils.tensorboard import SummaryWriter
     from src.utils import readme
     cfg, log_path = load_cfg()
     readme(log_path, opts, mode="a")
-    writter = SummaryWriter(log_dir=log_path, filename_suffix=METHOD)
 
     main(**cfg)
 
-    writter.close()
 
 

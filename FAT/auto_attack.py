@@ -60,7 +60,7 @@ def load_cfg() -> Tuple[Config, str]:
     # load the model
     model = load_model(opts.model)(num_classes=get_num_classes(opts.dataset))
     model.set_normalizer(load_normalizer(opts.dataset))
-    device = gpu(model)
+    device, model = gpu(model)
     load(
         model=model, 
         path=opts.info_path,
@@ -103,14 +103,11 @@ def main(attacker, data, targets):
 
 
 if __name__ == "__main__":
-    from torch.utils.tensorboard import SummaryWriter
     from src.utils import readme
     cfg, log_path = load_cfg()
     readme(log_path, opts, mode="a")
-    writter = SummaryWriter(log_dir=log_path, filename_suffix=METHOD)
 
     main(**cfg)
 
-    writter.close()
 
 

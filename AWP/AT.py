@@ -99,7 +99,7 @@ def load_cfg() -> Tuple[Config, str]:
     model.set_normalizer(load_normalizer(opts.dataset))
     proxy = load_model(opts.model)(num_classes=get_num_classes(opts.dataset))
     proxy.set_normalizer(load_normalizer(opts.dataset))
-    device = gpu(model, proxy)
+    device, model, proxy = gpu(model, proxy)
 
     # load the dataset
     trainset, validset = load_dataset(

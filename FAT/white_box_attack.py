@@ -69,7 +69,7 @@ def load_cfg() -> 'Config':
     # load the model
     model = load_model(opts.model)(num_classes=get_num_classes(opts.dataset))
     model.set_normalizer(load_normalizer(opts.dataset))
-    device = gpu(model)
+    device, model = gpu(model)
     load(
         model=model, 
         path=opts.info_path,

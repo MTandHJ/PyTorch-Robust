@@ -73,7 +73,7 @@ def load_cfg() -> 'Config':
     # load the source_model
     source_model = load_model(opts.source_model)(num_classes=get_num_classes(opts.dataset))
     source_model.set_normalizer(load_normalizer(opts.dataset))
-    device = gpu(source_model)
+    device, source_model = gpu(source_model)
     load(
         model=source_model, 
         path=opts.source_path,
@@ -84,7 +84,7 @@ def load_cfg() -> 'Config':
     # load the target_model
     target_model = load_model(opts.target_model)(num_classes=get_num_classes(opts.dataset))
     target_model.set_normalizer(load_normalizer(opts.dataset))
-    device = gpu(target_model)
+    device, target_model = gpu(target_model)
     load(
         model=target_model, 
         path=opts.target_path,

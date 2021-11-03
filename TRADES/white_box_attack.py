@@ -5,30 +5,31 @@ import torch
 import argparse
 from src.loadopts import *
 from src.utils import timemeter
+from src.config import SAVED_FILENAME
 
 
 METHOD = "WhiteBox"
-FMT = "{description}={attack}-{epsilon_min}-{epsilon_max}-{epsilon_times}-{stepsize}-{steps}"
+FMT = "{description}={attack}-{epsilon_min:.4f}-{epsilon_max}-{epsilon_times}-{stepsize}-{steps}"
 
 
 parser = argparse.ArgumentParser()
 parser.add_argument("model", type=str)
 parser.add_argument("dataset", type=str)
 parser.add_argument("info_path", type=str)
+parser.add_argument("--filename", type=str, default=SAVED_FILENAME)
 
 # adversarial settings
 parser.add_argument("--attack", type=str, default="pgd-linf")
 parser.add_argument("--epsilon_min", type=float, default=8/255)
 parser.add_argument("--epsilon_max", type=float, default=1.)
 parser.add_argument("--epsilon_times", type=int, default=1)
-parser.add_argument("--stepsize", type=float, default=0.1, 
+parser.add_argument("--stepsize", type=float, default=0.25, 
                     help="pgd:rel_stepsize, cwl2:step_size, deepfool:overshoot, bb:lr")
 parser.add_argument("--steps", type=int, default=20)
 
 # basic settings
 parser.add_argument("-b", "--batch_size", type=int, default=256)
-parser.add_argument("--transform", type=str, default='default', 
-                help="the data augmentation which will be applied in training mode.")
+parser.add_argument("--transform", type=str, default='tensor,none')
 parser.add_argument("--progress", action="store_false", default=True, 
                 help="show the progress if true")
 parser.add_argument("--log2file", action="store_false", default=True,
@@ -36,7 +37,7 @@ parser.add_argument("--log2file", action="store_false", default=True,
 parser.add_argument("--log2console", action="store_false", default=True,
                 help="False: remove console handler if log2file is True ...")
 parser.add_argument("--seed", type=int, default=1)
-parser.add_argument("-m", "--description", type=str, default="attack")
+parser.add_argument("-m", "--description", type=str, default=METHOD)
 opts = parser.parse_args()
 opts.description = FMT.format(**opts.__dict__)
 
@@ -68,17 +69,18 @@ def load_cfg() -> 'Config':
     # load the model
     model = load_model(opts.model)(num_classes=get_num_classes(opts.dataset))
     model.set_normalizer(load_normalizer(opts.dataset))
-    device = gpu(model)
+    device, model = gpu(model)
     load(
         model=model, 
         path=opts.info_path,
+        filename=opts.filename,
         device=device
     )
 
     # load the testset
     testset = load_dataset(
         dataset_type=opts.dataset,
-        transform=opts.transform,
+        transforms=opts.transform,
         train=False
     )
     cfg['testloader'] = load_dataloader(
@@ -126,43 +128,29 @@ def main(attacker, testloader, log_path):
             running_distance_l2[epsilon] += distance_lp(inputs_, clipped_, p=2, dim=dim_).sum().item()
 
     datasize = len(testloader.dataset)
-    head = "-".join(map(str, (opts.attack, opts.epsilon_min, opts.epsilon_max, 
-                        opts.epsilon_times, opts.stepsize, opts.steps)))
     for epsilon in range(opts.epsilon_times):
         running_distance_linf[epsilon] /= running_success[epsilon]
         running_distance_l2[epsilon] /= running_success[epsilon]
         running_success[epsilon] /= datasize
 
-        # writter.add_scalar(head+"Success", running_success[epsilon], epsilon)
-        # writter.add_scalars(
-        #     head+"Distance", 
-        #     {
-        #         "Linf": running_distance_linf[epsilon],
-        #         "L2": running_distance_l2[epsilon],
-        #     },
-        #     epsilon
-        # )
     running_accuracy = list(map(lambda x: 1. - x, running_success))
 
     running_accuracy = ', '.join([f"{acc:.3%}" for acc in running_accuracy])
     running_distance_linf = ', '.join([f"{dis_linf:.5f}" for dis_linf in running_distance_linf])
     running_distance_l2 = ', '.join([f"{dis_l2:.5f}" for dis_l2 in running_distance_l2])
-
+   
     logger.info(f"Accuracy: {running_accuracy}")
     logger.info(f"Distance-Linf: {running_distance_linf}")
     logger.info(f"Distance-L2: {running_distance_l2}")
    
 
 if __name__ == "__main__":
-    from torch.utils.tensorboard import SummaryWriter
     from src.utils import readme
     cfg = load_cfg()
     readme(cfg.log_path, opts, mode="a")
-    writter = SummaryWriter(log_dir=cfg.log_path, filename_suffix=METHOD)
 
     main(**cfg)
 
-    writter.close()
 
 
 
