@@ -11,19 +11,19 @@
 
 ### CIFAR-10
 
-    python train.py resnet32 cifar10 -lp=AT --epochs=200 -wd=0.0002 --leverage=0.5
+    python ALP.py resnet32 cifar10 -lp=AT --epochs=200 -wd=0.0002 --leverage=0.5
 
 ### CIFAR-100
 
-    python train.py resnet32 cifar100 -lp=AT --epochs=200 -wd=0.0002 --leverage=0.5
+    python ALP.py resnet32 cifar100 -lp=AT --epochs=200 -wd=0.0002 --leverage=0.5
 
 ### MNIST
 
-    python train.py mnist mnist -lp=null --epochs=84 -lr=0.0001 -wd=0 -mom=0 --optimizer=adam -b=50 --epsilon=0.3 --steps=40 --stepsize=0.01 --leverage=0.5
+    python ALP.py mnist mnist -lp=null --epochs=84 -lr=0.0001 -wd=0 -mom=0 --optimizer=adam -b=50 --epsilon=0.3 --steps=40 --stepsize=0.01 --leverage=0.5
 
 ### FashionMNIST
 
-    python train.py mnist fashionmnist -lp=null --epochs=84 -lr=0.0001 -wd=0 -mom=0 --optimizer=adam -b=50 --epsilon=0.3 --steps=40 --stepsize=0.01 --leverage=0.5
+    python ALP.py mnist fashionmnist -lp=null --epochs=84 -lr=0.0001 -wd=0 -mom=0 --optimizer=adam -b=50 --epsilon=0.3 --steps=40 --stepsize=0.01 --leverage=0.5
 
 
 
