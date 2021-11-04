@@ -5,6 +5,8 @@ import torch
 import torch.nn as nn
 import abc
 
+from src.config import DEVICE
+
 
 class ADType(abc.ABC): ...
 
@@ -35,20 +37,37 @@ class AdversarialDefensiveModule(ADType, nn.Module):
             if isinstance(module, ADType):
                 module.defend(mode)
 
-class ADArch(AdversarialDefensiveModule):
-
-    def set_normalizer(self, normalizer: Callable) -> None:
-        self.normalizer = normalizer
-
-    def __call__(self, inputs: torch.Tensor, **kwargs: Any) -> Any:
-        try:
-            inputs = self.normalizer(inputs)
-        except AttributeError as e:
-            errors = str(e) + "\n >>> You shall set normalizer manually by calling 'set_normalizer' ..."
-            raise AttributeError(errors)
-        return super().__call__(inputs, **kwargs)
 
 class DataParallel(nn.DataParallel, AdversarialDefensiveModule): ...
+
+class ADArch(AdversarialDefensiveModule):
+
+    def __init__(
+        self, model: AdversarialDefensiveModule,
+        mean: torch.Tensor, std: torch.Tensor, 
+        device: torch.device = DEVICE
+    ) -> None:
+        super().__init__()
+        if torch.cuda.device_count() > 1:
+            self.model = DataParallel(model)
+        else:
+            self.model = model.to(device)
+
+        self.mean, self.std = mean.to(device), std.to(device)
+
+    def state_dict(self, *args, **kwargs):
+        return self.model.state_dict(*args, **kwargs)
+    
+    def load_state_dict(self, *args, **kwargs):
+        return self.model.load_state_dict(*args, **kwargs)
+
+    def _normalize(self, x: torch.Tensor) -> torch.Tensor:
+        return (x - self.mean) / self.std
+
+    def __call__(self, inputs: torch.Tensor, **kwargs: Any) -> Any:
+        inputs = self._normalize(inputs)
+        return  self.model(inputs, **kwargs)
+
 
 
 if __name__ == "__main__":
