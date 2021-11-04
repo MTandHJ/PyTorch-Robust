@@ -1,9 +1,8 @@
 
-from typing import TypeVar, Callable, Optional, Tuple, Dict
+from typing import Callable, Tuple
 import numpy as np
 import torch
 import torchvision
-import torchvision.transforms as T
 import foolbox as fb
 
 import time
@@ -26,7 +25,7 @@ class DatasetNotIncludeError(Exception): pass
 
 # return the num_classes of corresponding data set
 def get_num_classes(dataset_type: str) -> int:
-    if dataset_type in ('mnist', 'fashionmnist', 'cifar10'):
+    if dataset_type in ('mnist', 'fashionmnist', 'svhn', 'cifar10'):
         return 10
     elif dataset_type in ('cifar100', ):
         return 100
@@ -41,7 +40,7 @@ def load_model(model_type: str) -> Callable[..., torch.nn.Module]:
     cifar: the model designed for CIFAR dataset
     resnet8|20|32|44|110|1202
     resnet18|34|50|101|50_32x4d
-    preactnet18
+    preactresnet18|34|50|101
     wrn_28_10: depth-28, width-10
     wrn_34_10: depth-34, width-10
     wrn_34_20: depth-34, width-20
@@ -49,8 +48,8 @@ def load_model(model_type: str) -> Callable[..., torch.nn.Module]:
     resnets = ['resnet8', 'resnet20', 'resnet32', 'resnet44', 
                 'resnet56', 'resnet110', 'resnet1202']
     srns = ['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnext50_32x4d']
+    prns = ['preactresnet18', 'preactresnet34', 'preactresnet50', 'preactresnet101']
     wrns = ['wrn_28_10', 'wrn_34_10', 'wrn_34_20']
-    prns = ['preact18']
 
     model: Callable[..., AdversarialDefensiveModule]
     if model_type == "mnist":
@@ -66,7 +65,7 @@ def load_model(model_type: str) -> Callable[..., torch.nn.Module]:
         import models.cifar_resnet as srn
         model = getattr(srn, model_type)
     elif model_type in prns:
-        import models.preactnet as prn
+        import models.preactresnet as prn
         model = getattr(prn, model_type)
     elif model_type in wrns:
         import models.wide_resnet as wrn
@@ -101,118 +100,94 @@ def load_loss_func(loss_type: str) -> Callable:
     return loss_func
 
 
-class _Normalize:
-
-    def __init__(
-        self, 
-        mean: Optional[Tuple]=None, 
-        std: Optional[Tuple]=None
-    ):
-        self.set_normalizer(mean, std)
-
-    def set_normalizer(self, mean, std):
-        if mean is None or std is None:
-            self.flag = False
-            return 0
-        self.flag = True
-        mean = torch.tensor(mean)
-        std = torch.tensor(std)
-        self.nat_normalize = T.Normalize(
-            mean=mean, std=std
-        )
-        self.inv_normalize = T.Normalize(
-            mean=-mean/std, std=1/std
-        )
-
-    def _normalize(self, imgs: torch.Tensor, inv: bool) -> torch.Tensor:
-        if not self.flag:
-            return imgs
-        if inv:
-            normalizer = self.inv_normalize
-        else:
-            normalizer = self.nat_normalize
-        new_imgs = [normalizer(img) for img in imgs]
-        return torch.stack(new_imgs)
-
-    def __call__(self, imgs: torch.Tensor, inv: bool = False) -> torch.Tensor:
-        # normalizer will set device automatically.
-        return self._normalize(imgs, inv)
-
-
-def _get_normalizer(dataset_type: str) -> _Normalize:
-    mean = MEANS[dataset_type]
-    std = STDS[dataset_type]
-    return _Normalize(mean, std)
-
-
-def _get_transform(
-    dataset_type: str, 
-    transform: str, 
-    train: bool = True
-) -> "augmentation":
-    if train:
-        return TRANSFORMS[dataset_type][transform]
-    else:
-        return T.ToTensor()
-
-
 def _dataset(
     dataset_type: str, 
-    transform: str,  
     train: bool = True
 ) -> torch.utils.data.Dataset:
     """
     Dataset:
     mnist: MNIST
     fashionmnist: FashionMNIST
+    svhn: SVHN
     cifar10: CIFAR-10
     cifar100: CIFAR-100
-    Transform:
-    default: the default transform for each data set
-    simclr: the transform introduced in SimCLR
     """
-    try:
-        transform = _get_transform(dataset_type, transform, train)
-    except KeyError:
-        raise DatasetNotIncludeError(f"Dataset {dataset_type} or transform {transform} is not included.\n" \
-                        f"Refer to the following: {_dataset.__doc__}")
-
     if dataset_type == "mnist":
         dataset = torchvision.datasets.MNIST(
-            root=ROOT, train=train, download=False,
-            transform=transform
+            root=ROOT, train=train, download=DOWNLOAD
         )
     elif dataset_type == "fashionmnist":
         dataset = torchvision.datasets.FashionMNIST(
-            root=ROOT, train=train, download=False,
-            transform=transform
+            root=ROOT, train=train, download=DOWNLOAD
+        )
+    elif dataset_type == "svhn":
+        split = 'train' if train else 'test'
+        dataset = torchvision.datasets.SVHN(
+            root=ROOT, split=split, download=DOWNLOAD
         )
     elif dataset_type == "cifar10":
         dataset = torchvision.datasets.CIFAR10(
-            root=ROOT, train=train, download=False,
-            transform=transform
+            root=ROOT, train=train, download=DOWNLOAD
         )
     elif dataset_type == "cifar100":
         dataset = torchvision.datasets.CIFAR100(
-            root=ROOT, train=train, download=False,
-            transform=transform
+            root=ROOT, train=train, download=DOWNLOAD
         )
+    else:
+        raise DatasetNotIncludeError("Dataset {0} is not included." \
+                        "Refer to the following: {1}".format(dataset_type, _dataset.__doc__))
         
     return dataset
 
 
-def load_normalizer(dataset_type: str) -> _Normalize:
-    normalizer = _get_normalizer(dataset_type)
-    return normalizer
+def load_normalizer(dataset_type: str, ndim: int = 3) -> Tuple[torch.Tensor]:
+    size = (-1,) + (1,) * (ndim - 1)
+    mean = MEANS[dataset_type]
+    std = STDS[dataset_type]
+    mean = torch.tensor(mean).view(size)
+    std = torch.tensor(std).view(size)
+    return mean, std
 
+
+def _split_dataset(
+    dataset: torch.utils.data.Dataset,
+    ratio: float = .1, seed: int = VALIDSEED,
+    shuffle: bool = True
+) -> Tuple[torch.utils.data.Dataset]:
+    from torch.utils.data import Subset
+    datasize = len(dataset)
+    indices = list(range(datasize))
+    if shuffle:
+        np.random.seed(seed)
+        np.random.shuffle(indices)
+    validsize = int(ratio * datasize)
+    getLogger().info(f"[Dataset] Split the dataset into trainset({datasize-validsize}) and validset({validsize}) ...")
+    train_indices, valid_indices = indices[validsize:], indices[:validsize]
+    trainset = Subset(dataset, train_indices)
+    validset = Subset(dataset, valid_indices)
+    return trainset, validset
 
 def load_dataset(
     dataset_type: str, 
-    transform: str ='default', 
+    transforms: str ='default', 
+    ratio: float = 0.1,
+    seed: int = VALIDSEED,
+    shuffle: bool = True,
     train: bool = True
 ) -> torch.utils.data.Dataset:
-    dataset = _dataset(dataset_type, transform, train)
-    return dataset
+    from .datasets import WrapperSet
+    dataset = _dataset(dataset_type, train)
+    if train:
+        transforms = TRANSFORMS[dataset_type] if transforms == 'default' else transforms
+        getLogger().info(f"[Dataset] Apply transforms of '{transforms}' to trainset ...")
+        trainset, validset = _split_dataset(dataset, ratio, seed, shuffle)
+        trainset = WrapperSet(trainset, transforms=transforms)
+        validset = WrapperSet(validset, transforms=TRANSFORMS['validation'])
+        return trainset, validset
+    else:
+        getLogger().info(f"[Dataset] Apply transforms of '{transforms}' to testset ...")
+        testset = WrapperSet(dataset, transforms=transforms)
+        return testset
 
 
 class _TQDMDataLoader(torch.utils.data.DataLoader):
@@ -224,22 +199,6 @@ class _TQDMDataLoader(torch.utils.data.DataLoader):
             )
         )
 
-def _get_sampler(
-    dataset: torch.utils.data.Dataset,
-    rate: float = .1,
-    shuffle: bool = True, seed: int = 1
-) -> torch.utils.data.SubsetRandomSampler:
-    datasize = len(dataset)
-    indices = list(range(datasize))
-    if shuffle:
-        np.random.seed(seed)
-        np.random.shuffle(indices)
-    validsize = int(rate * datasize)
-    train_indices, valid_indices = indices[validsize:], indices[:validsize]
-    trainsampler = torch.utils.data.SubsetRandomSampler(train_indices)
-    validsampler = torch.utils.data.SubsetRandomSampler(valid_indices)
-    return trainsampler, validsampler
-
 def load_dataloader(
     dataset: torch.utils.data.Dataset, 
     batch_size: int, 
@@ -249,15 +208,16 @@ def load_dataloader(
 
     dataloader = _TQDMDataLoader if show_progress else torch.utils.data.DataLoader
     if train:
-        dataloader = dataloader(dataset, batch_size=batch_size,
-                                        shuffle=True, num_workers=NUM_WORKERS,
-                                        pin_memory=PIN_MEMORY)
+        loader = dataloader(
+            dataset, batch_size=batch_size, shuffle=True,
+            num_workers=NUM_WORKERS, pin_memory=PIN_MEMORY
+        )
     else:
-        dataloader = dataloader(dataset, batch_size=batch_size,
-                                        shuffle=False, num_workers=NUM_WORKERS,
-                                        pin_memory=PIN_MEMORY)
-
-    return dataloader
+        loader = dataloader(
+            dataset, batch_size=batch_size, shuffle=False,
+            num_workers=NUM_WORKERS, pin_memory=PIN_MEMORY
+        )
+    return loader
 
 
 def load_optimizer(
@@ -327,13 +287,11 @@ def load_learning_policy(
     return learning_policy
 
 
-def _attack(attack_type: str, stepsize: float, steps: int) -> fb.attacks.Attack:
+def load_fb_attack(attack_type: str, steps: int, stepsize: float) -> fb.attacks.Attack:
     """
     pgd-linf: \ell_{\infty} rel_stepsize=stepsize, steps=steps;
     pgd-l1: \ell_1 version;
     pgd-l2: \ell_2 version;
-    pgd-kl: pgd-linf with KL divergence loss;
-    pgd-softmax: pgd-linf with cross-entropy loss which takes probs as inputs
     fgsm: no hyper-parameters;
     cw-l2: stepsize=stepsize, steps=steps;
     ead: initial_stepsize=stepsize, steps=steps;
@@ -357,18 +315,6 @@ def _attack(attack_type: str, stepsize: float, steps: int) -> fb.attacks.Attack:
         )
     elif attack_type == "pgd-l1":
         attack = fb.attacks.L1PGD(
-            rel_stepsize=stepsize,
-            steps=steps
-        )
-    elif attack_type == "pgd-kl":
-        from .attacks import LinfPGDKLDiv
-        attack = LinfPGDKLDiv(
-            rel_stepsize=stepsize,
-            steps=steps
-        )
-    elif attack_type == "pgd-softmax":
-        from .attacks import LinfPGDSoftmax
-        attack = LinfPGDSoftmax(
             rel_stepsize=stepsize,
             steps=steps
         )
@@ -418,25 +364,50 @@ def _attack(attack_type: str, stepsize: float, steps: int) -> fb.attacks.Attack:
         )
     else:
         raise AttackNotIncludeError(f"Attack {attack_type} is not included.\n" \
-                    f"Refer to the following: {_attack.__doc__}")
+                    f"Refer to the following: {load_fb_attack.__doc__}")
     return attack
 
 
 def load_attack(
-    attack_type: str, stepsize: float, steps: int
-) -> fb.attacks.Attack:
-    attack = _attack(attack_type, stepsize, steps)
+    attack_type: str, epsilon: float, 
+    steps: int, stepsize: float,
+    random_start: bool = True, bounds: Tuple[float] = BOUNDS
+) -> Callable:
+    '''
+    pgd-linf: \ell_{\infty};
+    pgd-l2: \ell_2 version;
+    pgd-linf-kl: \ell_{infty} with kl divergence
+    pgd-l2l-kl: \ell_2 with kl divergence
+    '''
+    if attack_type == 'pgd-linf':
+        from .attacks import LinfPGD
+        attack = LinfPGD
+    elif attack_type == 'pgd-l2':
+        from .attacks import L2PGD
+        attack = L2PGD
+    elif attack_type == 'pgd-linf-kl':
+        from .attacks import LinfPGDKLdiv
+        attack = LinfPGDKLdiv
+    elif attack_type == 'pgd-l2-kl':
+        from .attacks import L2PGDKLdiv
+        attack = L2PGDKLdiv
+    else:
+        raise AttackNotIncludeError(f"Attack {attack_type} is not included.\n" \
+                    f"Refer to the following: {load_attack.__doc__}")
+    attack = attack(
+        epsilon=epsilon, steps=steps, stepsize=stepsize,
+        random_start=random_start, bounds=bounds
+    )
     return attack
 
 
 def load_valider(
-    model: torch.nn.Module, device: torch.device, dataset_type: str
+    model: torch.nn.Module, dataset_type: str, device: torch.device = DEVICE,
 ) -> AdversaryForValid:
-    cfg, epsilon = VALIDER[dataset_type]
+    cfg = VALIDER[dataset_type]
     attack = load_attack(**cfg)
     valider = AdversaryForValid(
-        model=model, attacker=attack, 
-        device=device, epsilon=epsilon
+        model=model, attacker=attack, device=device
     )
     return valider
 

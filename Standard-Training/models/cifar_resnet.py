@@ -8,7 +8,7 @@ AidenDurrant: https://raw.githubusercontent.com/AidenDurrant/MoCo-Pytorch/master
 
 import torch
 import torch.nn as nn
-from .base import AdversarialDefensiveModule, ADArch
+from .base import AdversarialDefensiveModule
 from .layerops import Sequential
 
 
@@ -115,7 +115,7 @@ class Bottleneck(AdversarialDefensiveModule):
         return out
 
 
-class ResNet(ADArch):
+class ResNet(AdversarialDefensiveModule):
     def __init__(self, block, layers, num_classes=1000, zero_init_residual=False,
                  groups=1, width_per_group=64, replace_stride_with_dilation=None,
                  norm_layer=None):

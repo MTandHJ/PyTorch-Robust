@@ -6,7 +6,7 @@ Reference:
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from .base import AdversarialDefensiveModule, ADArch
+from .base import AdversarialDefensiveModule
 from .layerops import Sequential
 
 
@@ -63,7 +63,7 @@ class PreActBottleneck(AdversarialDefensiveModule):
         return out
 
 
-class PreActResNet(ADArch):
+class PreActResNet(AdversarialDefensiveModule):
     def __init__(self, block, num_blocks, num_classes=10):
         super(PreActResNet, self).__init__()
         self.in_planes = 64
