@@ -16,8 +16,7 @@ import os
 import copy
 import pickle
 
-from .config import SAVED_FILENAME, LOGGER
-from models.base import DataParallel
+from .config import SAVED_FILENAME, LOGGER, DEVICE
 
 
 
@@ -53,10 +52,10 @@ def timemeter(prefix=""):
     def decorator(func):
         logger = getLogger()
         def wrapper(*args, **kwargs):
-            start = time.process_time()
+            start = time.time()
             results = func(*args, **kwargs)
-            end = time.process_time()
-            logger.info(f"[CPU TIME]- {prefix} takes {end-start:.6f} seconds ...")
+            end = time.time()
+            logger.info(f"[Wall TIME]- {prefix} takes {end-start:.6f} seconds ...")
             return  results
         wrapper.__doc__ = func.__doc__
         wrapper.__name__ = func.__name__
@@ -164,16 +163,6 @@ class ImageMeter:
         _file = os.path.join(path, filename)
         self.fp.savefig(_file)
 
-def gpu(*models: nn.Module) -> List:
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    return_ = [device]
-    for model in models:
-        if torch.cuda.device_count() > 1:
-            return_.append(DataParallel(model))
-        else:
-            return_.append(model.to(device))
-    return return_
-
 def mkdirs(*paths: str) -> None:
     for path in paths:
         try:
@@ -201,14 +190,14 @@ def readme(path: str, opts: "parser", mode: str = "w") -> None:
 def load(
     model: nn.Module, 
     path: str, 
-    device: torch.device,
+    device: torch.device = DEVICE,
     filename: str = SAVED_FILENAME,
     strict: bool = True, 
     except_key: Optional[str] = None
 ) -> None:
 
     filename = os.path.join(path, filename)
-    if str(device) =="cpu":
+    if str(device) == "cpu":
         state_dict = torch.load(filename, map_location="cpu")
         
     else:

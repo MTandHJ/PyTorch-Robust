@@ -10,7 +10,7 @@ import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from .base import ADArch, AdversarialDefensiveModule
+from .base import AdversarialDefensiveModule
 from .layerops import Sequential
 
 
@@ -59,7 +59,7 @@ class NetworkBlock(AdversarialDefensiveModule):
         return self.layer(x)
 
 
-class WideResNet(ADArch):
+class WideResNet(AdversarialDefensiveModule):
     def __init__(self, depth=34, num_classes=10, widen_factor=10, dropRate=0.0):
         super(WideResNet, self).__init__()
         nChannels = [16, 16 * widen_factor, 32 * widen_factor, 64 * widen_factor]

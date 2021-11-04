@@ -1,5 +1,6 @@
 
 
+
 ## ALP
 
 
@@ -18,11 +19,11 @@
 
 ### MNIST
 
-    python train.py mnist mnist -lp=null --epochs=84 -lr=0.0001 -wd=0 -mom=0 --optimizer=adam -b=50 --epsilon=0.3 --steps=40 --stepsize=0.0333333 --leverage=0.5
+    python train.py mnist mnist -lp=null --epochs=84 -lr=0.0001 -wd=0 -mom=0 --optimizer=adam -b=50 --epsilon=0.3 --steps=40 --stepsize=0.01 --leverage=0.5
 
 ### FashionMNIST
 
-    python train.py mnist fashionmnist -lp=null --epochs=84 -lr=0.0001 -wd=0 -mom=0 --optimizer=adam -b=50 --epsilon=0.3 --steps=40 --stepsize=0.0333333 --leverage=0.5
+    python train.py mnist fashionmnist -lp=null --epochs=84 -lr=0.0001 -wd=0 -mom=0 --optimizer=adam -b=50 --epsilon=0.3 --steps=40 --stepsize=0.01 --leverage=0.5
 
 
 
@@ -139,6 +140,7 @@
 | $\ell_1$ | leverage |  Net  |  LP  | Nat(%) | PGD-50 | SLIDE |
 | :---------------: | :------: | :---: | :--: | :----: | :----: | :---: |
 |        10         |   0.5    | mnist | null | 83.08  | 65.74  | 53.65 |
+
 
 
 

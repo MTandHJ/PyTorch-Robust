@@ -13,28 +13,20 @@
 
 
 
-import torchvision.transforms as T
-import random
+import torch
 import logging
-from PIL import ImageFilter
 from .dict2obj import Config
 
 
 
-class _GaussBlur:
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    def __init__(self, sigma=(.1, 2.)):
-        self.sigma = sigma
+ROOT = "../data" # the path saving the data
+DOWNLOAD = False # whether to download the data
 
-    def __call__(self, x):
-        sigma = random.uniform(self.sigma[0], self.sigma[1])
-        x = x.filter(ImageFilter.GaussianBlur(radius=sigma))
-        return x
-
-
-
-ROOT = "../../data" # the path saving the data
 SAVED_FILENAME = "paras.pt" # the filename of saved model paramters
+PRE_BESTNAT = "nat"
+PRE_BESTROB = "rob"
 INFO_PATH = "./infos/{method}/{dataset}-{model}/{description}"
 LOG_PATH = "./logs/{method}/{dataset}-{model}/{description}-{time}"
 TIMEFMT = "%m%d%H"
@@ -49,53 +41,25 @@ LOGGER = Config(
     )
 )
 
+# the seed for validloader preparation
+VALIDSEED = 1
 
+# default transforms
 TRANSFORMS = {
-    "mnist": {
-        'default': T.ToTensor()
-    },
-    "fashionmnist": {
-        'default': T.ToTensor()
-    },
-    "cifar10": {
-        'default': T.Compose((
-            T.Pad(4, padding_mode='reflect'),
-            T.RandomCrop(32),
-            T.RandomHorizontalFlip(),
-            T.ToTensor()
-        )),
-        'simclr': T.Compose((
-            T.RandomResizedCrop(32, scale=(0.2, 1.0)),
-            T.RandomApply([T.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8),
-            T.RandomGrayscale(p=0.2),
-            T.RandomApply([_GaussBlur()], p=0.5),
-            T.RandomHorizontalFlip(),
-            T.ToTensor()
-        ))
-    },
-    "cifar100": {
-        'default': T.Compose((
-            T.Pad(4, padding_mode='reflect'),
-            T.RandomCrop(32),
-            T.RandomHorizontalFlip(),
-            T.ToTensor()
-        )),
-        'simclr': T.Compose((
-            T.RandomResizedCrop(32, scale=(0.2, 1.0)),
-            T.RandomApply([T.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8),
-            T.RandomGrayscale(p=0.2),
-            T.RandomApply([_GaussBlur()], p=0.5),
-            T.RandomHorizontalFlip(),
-            T.ToTensor()
-        ))
-    }
+    'mnist': 'tensor,none',
+    'fashionmnist': 'tensor,none',
+    'svhn': 'tensor,none',
+    'cifar10': 'cifar,none',
+    'cifar100': 'cifar,none',
+    'validation': 'tensor,none'
 }
 
 VALIDER = {
-    "mnist": (Config(attack_type="pgd-linf", stepsize=0.033333, steps=100), 0.3),
-    "fashionmnist": (Config(attack_type="pgd-linf", stepsize=0.033333, steps=100), 0.3),
-    "cifar10": (Config(attack_type="pgd-linf", stepsize=0.25, steps=10), 8/255),
-    "cifar100": (Config(attack_type="pgd-linf", stepsize=0.25, steps=10), 8/255)
+    "mnist": Config(attack_type="pgd-linf", epsilon=0.3, stepsize=0.033333, steps=100),
+    "fashionmnist": Config(attack_type="pgd-linf", epsilon=0.3, stepsize=0.033333, steps=100),
+    "svhn": Config(attack_type="pgd-linf", epsilon=8/255, stepsize=0.25, steps=10),
+    "cifar10": Config(attack_type="pgd-linf", epsilon=8/255, stepsize=0.25, steps=10),
+    "cifar100": Config(attack_type="pgd-linf", epsilon=8/255, stepsize=0.25, steps=10),
 }
 
 # env settings
@@ -103,18 +67,20 @@ NUM_WORKERS = 3
 PIN_MEMORY = True
 
 # basic properties of inputs
-BOUNDS = (0, 1) # for fb.attacks.Attack
+BOUNDS = (0, 1) # for attacks
 PREPROCESSING = None # for fb.attacks.Attack
 MEANS = {
-    "mnist": None,
-    "fashionmnist": None,
+    "mnist": [0,],
+    "fashionmnist": [0,],
+    'svhn': [0.5, 0.5, 0.5],
     "cifar10": [0.4914, 0.4824, 0.4467],
     "cifar100": [0.5071, 0.4867, 0.4408]
 }
 
 STDS = {
-    "mnist": None,
-    "fashionmnist": None,
+    "mnist": [1,],
+    "fashionmnist": [1,],
+    'svhn': [0.5, 0.5, 0.5],
     "cifar10": [0.2471, 0.2435, 0.2617],
     "cifar100": [0.2675, 0.2565, 0.2761]
 }
@@ -127,22 +93,30 @@ OPTIMS = {
 }
 
 
-# the learning schedular can be added here
+# the learning schedule can be added here
 LEARNING_POLICY = {
-   "default": (
-        "MultiStepLR",
-        Config(
-            milestones=[50, 75],
-            gamma=0.1,
-            prefix="Default leaning policy will be applied:"
-        )
-    ),
     "null": (
         "StepLR",
         Config(
             step_size=9999999999999,
             gamma=1,
             prefix="Null leaning policy will be applied:"
+        )
+    ),
+   "Pang2021ICLR": (
+        "MultiStepLR",
+        Config(
+            milestones=[100, 105],
+            gamma=0.1,
+            prefix="Pang2020ICLR leaning policy will be applied:"
+        )
+    ),
+    "Rice2020ICML": (
+        "MultiStepLR",
+        Config(
+            milestones=[100, 150],
+            gamma=0.1,
+            prefix="Rice2020ICML leaning policy will be applied:"
         )
     ),
     "STD": (
@@ -182,7 +156,7 @@ LEARNING_POLICY = {
         Config(
             milestones=[55, 75, 90],
             gamma=0.1,
-            prefix="TRADES learning policy, an official config for MNIST:"
+            prefix="TRADES-M learning policy, an official config for MNIST:"
         )
     ),
     "cosine":(   
