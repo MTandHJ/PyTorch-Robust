@@ -33,12 +33,12 @@ parser.add_argument("-beta1", "--beta1", type=float, default=0.9,
                 help="the first beta argument for Adam")
 parser.add_argument("-beta2", "--beta2", type=float, default=0.999,
                 help="the second beta argument for Adam")
-parser.add_argument("-wd", "--weight_decay", type=float, default=5e-4,
+parser.add_argument("-wd", "--weight_decay", type=float, default=2e-4,
                 help="weight decay")
 parser.add_argument("-lr", "--lr", "--LR", "--learning_rate", type=float, default=0.1)
-parser.add_argument("-lp", "--learning_policy", type=str, default="default", 
+parser.add_argument("-lp", "--learning_policy", type=str, default="AT", 
                 help="learning rate schedule defined in config.py")
-parser.add_argument("--epochs", type=int, default=110)
+parser.add_argument("--epochs", type=int, default=200)
 parser.add_argument("-b", "--batch_size", type=int, default=128)
 parser.add_argument("--transform", type=str, default='default', 
                 help="the data augmentations which will be applied during training.")
