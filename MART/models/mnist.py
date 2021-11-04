@@ -6,12 +6,12 @@
 
 
 import torch.nn as nn
-from .base import ADArch
+from .base import AdversarialDefensiveModule
 from .layerops import Sequential
 
 
 
-class MNIST(ADArch):
+class MNIST(AdversarialDefensiveModule):
     def __init__(self, dim_feature=200, num_classes=10, drop=0.5):
         super(MNIST, self).__init__()
 

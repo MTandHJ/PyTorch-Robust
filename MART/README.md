@@ -9,7 +9,7 @@
 
 
 
-**Note:** The official-code adopts a absolute step size of 0.007 but we use 2/255 following PGD-AT. There exists difference of settings between the codes and those claimed in the paper. We follows the official code here.
+**Note:** There exists differences between the codes and those claimed in the paper. We follows the official code here.
 
  
 
@@ -26,56 +26,3 @@
 
 
 ## Evaluation
-
-
-
-### CIFAR10
-
-
-
-| $\ell_{\infty}$ | leverage |   Net    |  LP  | Nat(%) | FGSM  | PGD-10 | PGD-40 | DeepFool |  AA   |
-| :-------------: | :------: | :------: | :--: | :----: | :---: | :----: | :----: | :------: | :---: |
-|      8/255      |    5     | ResNet18 | MART | 81.72  | 59.33 | 53.89  | 52.97  |  53.95   | 47.76 |
-|     16/255      |    5     | ResNet18 | MART | 81.72  | 42.93 | 26.09  | 22.67  |  33.45   | 13.23 |
-
-
-
-
-
-| $\ell_2$ | leverage |   Net    |  LP  | Nat(%) | PGD-50 | DeepFool |  C&W  |  AA   |
-| :------: | :------: | :------: | :--: | :----: | :----: | :------: | :---: | :---: |
-|   0.5    |    5     | ResNet18 | MART | 81.72  | 61.62  |  62.18   | 58.55 | 57.55 |
-
-
-
-
-| $\ell_1$ | leverage |   Net    |  LP  | Nat(%) | PGD-50 | SLIDE |
-| :------: | :------: | :------: | :--: | :----: | :----: | :---: |
-|    12    |    5     | ResNet18 | MART | 81.72  | 61.36  | 29.80 |
-
-
-
-### CIFAR100
-
-
-
-| $\ell_{\infty}$ | leverage |   Net    |  LP  | Nat(%) | FGSM  | PGD-10 | PGD-40 | DeepFool |  AA   |
-| :-------------: | :------: | :------: | :--: | :----: | :---: | :----: | :----: | :------: | :---: |
-|      8/255      |    5     | ResNet18 | MART | 54.11  | 33.99 | 31.93  | 31.60  |  28.39   | 26.06 |
-|     16/255      |    5     | ResNet18 | MART | 54.11  | 21.25 | 15.01  | 13.90  |  14.87   | 9.61  |
-
-
-
-
-
-| $\ell_2$ | leverage |   Net    |  LP  | Nat(%) | PGD-50 | DeepFool |  C&W   |  AA   |
-| :------: | :------: | :------: | :--: | :----: | :----: | :------: | :----: | :---: |
-|   0.5    |    5     | ResNet18 | MART | 54.11  | 37.53  |  34.75   | 33.450 | 32.06 |
-
-
-
-
-| $\ell_1$ | leverage |   Net    |  LP  | Nat(%) | PGD-50 | SLIDE  |
-| :------: | :------: | :------: | :--: | :----: | :----: | :----: |
-|    12    |    5     | ResNet18 | MART | 54.11  | 36.950 | 16.470 |
-
