@@ -25,7 +25,7 @@
 
 
 
-We report the best checkpoint on the validation set.
+We report the results on the best checkpoint according to the validation set.
 
 
 

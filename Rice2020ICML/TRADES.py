@@ -8,9 +8,9 @@ from src.utils import timemeter
 
 
 
-METHOD = "AT"
+METHOD = "TRADES"
 SAVE_FREQ = 5
-FMT = "{description}={learning_policy}-{optimizer}-{lr}-{weight_decay}" \
+FMT = "{description}={leverage}={learning_policy}-{optimizer}-{lr}-{weight_decay}" \
         "={attack}-{epsilon:.4f}-{stepsize}-{steps}" \
         "={batch_size}={transform}"
 
@@ -19,13 +19,13 @@ parser.add_argument("model", type=str)
 parser.add_argument("dataset", type=str)
 
 # adversarial training settings
-parser.add_argument("--attack", type=str, default="pgd-linf")
+parser.add_argument("--leverage", type=float, default=6.)
+parser.add_argument("--attack", type=str, default="pgd-linf-kl")
 parser.add_argument("--epsilon", type=float, default=8/255)
-parser.add_argument("--stepsize", type=float, default=2/255)
+parser.add_argument("--stepsize", type=float, default=0.007)
 parser.add_argument("--steps", type=int, default=10)
 
 # basic settings
-parser.add_argument("--loss", type=str, default="cross_entropy")
 parser.add_argument("--optimizer", type=str, choices=("sgd", "adam"), default="sgd")
 parser.add_argument("-mom", "--momentum", type=float, default=0.9,
                 help="the momentum used for SGD")
@@ -75,7 +75,7 @@ def load_cfg() -> Tuple[Config, str]:
     from models.base import ADArch
 
     cfg = Config()
-
+   
     # generate the path for logging information and saving parameters
     cfg['info_path'], cfg['log_path'] = generate_path(
         method=METHOD, dataset_type=opts.dataset, 
@@ -136,7 +136,6 @@ def load_cfg() -> Tuple[Config, str]:
         T_max=opts.epochs
     )
 
-    
     if opts.resume:
         cfg['start_epoch'] = load_checkpoint(
             path=cfg.info_path, model=model, 
@@ -147,7 +146,7 @@ def load_cfg() -> Tuple[Config, str]:
 
     cfg['coach'] = Coach(
         model=model,
-        loss_func=load_loss_func(opts.loss), 
+        loss_func=None, 
         optimizer=optimizer, 
         learning_policy=learning_policy
     )
@@ -219,7 +218,7 @@ def main(
                 acc_nat, acc_rob = evaluate(validloader, prefix="Valid", epoch=epoch)
                 coach.check_best(acc_nat, acc_rob, info_path, epoch=epoch)
 
-        running_loss = coach.adv_train(trainloader, attacker, epoch=epoch)
+        running_loss = coach.trades(trainloader, attacker, leverage=opts.leverage, epoch=epoch)
 
     # save the model
     coach.save(info_path)
@@ -236,7 +235,6 @@ def main(
 
 
 
-
 if __name__ ==  "__main__":
     from src.utils import readme
     cfg = load_cfg()
@@ -245,6 +243,3 @@ if __name__ ==  "__main__":
     readme(cfg.log_path, opts, mode="a")
 
     main(**cfg)
-
-
-

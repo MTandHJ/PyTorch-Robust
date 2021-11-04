@@ -6,7 +6,7 @@ import torch
 import argparse
 from src.loadopts import *
 from src.utils import timemeter
-from src.config import SAVED_FILENAME
+from src.config import SAVED_FILENAME, DEVICE
 
 
 METHOD = "WhiteBox"
@@ -45,7 +45,8 @@ opts.description = FMT.format(**opts.__dict__)
 @timemeter("Setup")
 def load_cfg() -> 'Config':
     from src.dict2obj import Config
-    from src.utils import gpu, load, set_seed, set_logger
+    from src.utils import load, set_seed, set_logger
+    from models.base import ADArch
 
     cfg = Config()
    
@@ -66,15 +67,14 @@ def load_cfg() -> 'Config':
 
     # load the model
     model = load_model(opts.model)(num_classes=get_num_classes(opts.dataset))
-    model.set_normalizer(load_normalizer(opts.dataset))
-    device = gpu(model)
+    mean, std = load_normalizer(opts.dataset)
+    model = ADArch(model=model, mean=mean, std=std)
     load(
         model=model, 
         path=opts.info_path,
-        filename=opts.filename,
-        device=device
+        filename=opts.filename
     )
-    cfg['model'], cfg['device'] = model, device
+    cfg['model'] = model
 
     return cfg
 
@@ -107,7 +107,7 @@ def load_cifar_c(corruption: str) -> Iterable:
 
 
 @timemeter("Main")
-def main(model, device, log_path):
+def main(model, log_path, device=DEVICE):
 
     from src.utils import AverageMeter, getLogger
 

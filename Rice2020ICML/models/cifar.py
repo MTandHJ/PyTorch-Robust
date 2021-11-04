@@ -1,15 +1,14 @@
 
 
 
-import torch
 import torch.nn as nn
-from .base import ADArch
+from .base import AdversarialDefensiveModule
 from .layerops import Sequential
 
 
 
 
-class CIFAR(ADArch):
+class CIFAR(AdversarialDefensiveModule):
 
     def __init__(self, dim_feature=256, num_classes=10):
         super(CIFAR, self).__init__()

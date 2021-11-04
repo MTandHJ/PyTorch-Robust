@@ -1,9 +1,8 @@
 
-from typing import TypeVar, Callable, Optional, Tuple, Dict
+from typing import Callable, Tuple
 import numpy as np
 import torch
 import torchvision
-import torchvision.transforms as T
 import foolbox as fb
 
 import time
@@ -101,50 +100,6 @@ def load_loss_func(loss_type: str) -> Callable:
     return loss_func
 
 
-class _Normalize:
-
-    def __init__(
-        self, 
-        mean: Optional[Tuple]=None, 
-        std: Optional[Tuple]=None
-    ):
-        self.set_normalizer(mean, std)
-
-    def set_normalizer(self, mean, std):
-        if mean is None or std is None:
-            self.flag = False
-            return 0
-        self.flag = True
-        mean = torch.tensor(mean)
-        std = torch.tensor(std)
-        self.nat_normalize = T.Normalize(
-            mean=mean, std=std
-        )
-        self.inv_normalize = T.Normalize(
-            mean=-mean/std, std=1/std
-        )
-
-    def _normalize(self, imgs: torch.Tensor, inv: bool) -> torch.Tensor:
-        if not self.flag:
-            return imgs
-        if inv:
-            normalizer = self.inv_normalize
-        else:
-            normalizer = self.nat_normalize
-        new_imgs = [normalizer(img) for img in imgs]
-        return torch.stack(new_imgs)
-
-    def __call__(self, imgs: torch.Tensor, inv: bool = False) -> torch.Tensor:
-        # normalizer will set device automatically.
-        return self._normalize(imgs, inv)
-
-
-def _get_normalizer(dataset_type: str) -> _Normalize:
-    mean = MEANS[dataset_type]
-    std = STDS[dataset_type]
-    return _Normalize(mean, std)
-
-
 def _dataset(
     dataset_type: str, 
     train: bool = True
@@ -159,24 +114,24 @@ def _dataset(
     """
     if dataset_type == "mnist":
         dataset = torchvision.datasets.MNIST(
-            root=ROOT, train=train, download=False
+            root=ROOT, train=train, download=DOWNLOAD
         )
     elif dataset_type == "fashionmnist":
         dataset = torchvision.datasets.FashionMNIST(
-            root=ROOT, train=train, download=False
+            root=ROOT, train=train, download=DOWNLOAD
         )
     elif dataset_type == "svhn":
         split = 'train' if train else 'test'
         dataset = torchvision.datasets.SVHN(
-            root=ROOT, split=split, download=False
+            root=ROOT, split=split, download=DOWNLOAD
         )
     elif dataset_type == "cifar10":
         dataset = torchvision.datasets.CIFAR10(
-            root=ROOT, train=train, download=False
+            root=ROOT, train=train, download=DOWNLOAD
         )
     elif dataset_type == "cifar100":
         dataset = torchvision.datasets.CIFAR100(
-            root=ROOT, train=train, download=False,
+            root=ROOT, train=train, download=DOWNLOAD
         )
     else:
         raise DatasetNotIncludeError("Dataset {0} is not included." \
@@ -185,9 +140,13 @@ def _dataset(
     return dataset
 
 
-def load_normalizer(dataset_type: str) -> _Normalize:
-    normalizer = _get_normalizer(dataset_type)
-    return normalizer
+def load_normalizer(dataset_type: str, ndim: int = 3) -> Tuple[torch.Tensor]:
+    size = (-1,) + (1,) * (ndim - 1)
+    mean = MEANS[dataset_type]
+    std = STDS[dataset_type]
+    mean = torch.tensor(mean).view(size)
+    std = torch.tensor(std).view(size)
+    return mean, std
 
 
 def _split_dataset(
@@ -328,13 +287,11 @@ def load_learning_policy(
     return learning_policy
 
 
-def _attack(attack_type: str, stepsize: float, steps: int) -> fb.attacks.Attack:
+def load_fb_attack(attack_type: str, steps: int, stepsize: float) -> fb.attacks.Attack:
     """
     pgd-linf: \ell_{\infty} rel_stepsize=stepsize, steps=steps;
     pgd-l1: \ell_1 version;
     pgd-l2: \ell_2 version;
-    pgd-kl: pgd-linf with KL divergence loss;
-    pgd-softmax: pgd-linf with cross-entropy loss which takes probs as inputs
     fgsm: no hyper-parameters;
     cw-l2: stepsize=stepsize, steps=steps;
     ead: initial_stepsize=stepsize, steps=steps;
@@ -358,18 +315,6 @@ def _attack(attack_type: str, stepsize: float, steps: int) -> fb.attacks.Attack:
         )
     elif attack_type == "pgd-l1":
         attack = fb.attacks.L1PGD(
-            rel_stepsize=stepsize,
-            steps=steps
-        )
-    elif attack_type == "pgd-kl":
-        from .attacks import LinfPGDKLDiv
-        attack = LinfPGDKLDiv(
-            rel_stepsize=stepsize,
-            steps=steps
-        )
-    elif attack_type == "pgd-softmax":
-        from .attacks import LinfPGDSoftmax
-        attack = LinfPGDSoftmax(
             rel_stepsize=stepsize,
             steps=steps
         )
@@ -419,25 +364,50 @@ def _attack(attack_type: str, stepsize: float, steps: int) -> fb.attacks.Attack:
         )
     else:
         raise AttackNotIncludeError(f"Attack {attack_type} is not included.\n" \
-                    f"Refer to the following: {_attack.__doc__}")
+                    f"Refer to the following: {load_fb_attack.__doc__}")
     return attack
 
 
 def load_attack(
-    attack_type: str, stepsize: float, steps: int
-) -> fb.attacks.Attack:
-    attack = _attack(attack_type, stepsize, steps)
+    attack_type: str, epsilon: float, 
+    steps: int, stepsize: float,
+    random_start: bool = True, bounds: Tuple[float] = BOUNDS
+) -> Callable:
+    '''
+    pgd-linf: \ell_{\infty};
+    pgd-l2: \ell_2 version;
+    pgd-linf-kl: \ell_{infty} with kl divergence
+    pgd-l2l-kl: \ell_2 with kl divergence
+    '''
+    if attack_type == 'pgd-linf':
+        from .attacks import LinfPGD
+        attack = LinfPGD
+    elif attack_type == 'pgd-l2':
+        from .attacks import L2PGD
+        attack = L2PGD
+    elif attack_type == 'pgd-linf-kl':
+        from .attacks import LinfPGDKLdiv
+        attack = LinfPGDKLdiv
+    elif attack_type == 'pgd-l2-kl':
+        from .attacks import L2PGDKLdiv
+        attack = L2PGDKLdiv
+    else:
+        raise AttackNotIncludeError(f"Attack {attack_type} is not included.\n" \
+                    f"Refer to the following: {load_attack.__doc__}")
+    attack = attack(
+        epsilon=epsilon, steps=steps, stepsize=stepsize,
+        random_start=random_start, bounds=bounds
+    )
     return attack
 
 
 def load_valider(
-    model: torch.nn.Module, device: torch.device, dataset_type: str
+    model: torch.nn.Module, dataset_type: str, device: torch.device = DEVICE,
 ) -> AdversaryForValid:
-    cfg, epsilon = VALIDER[dataset_type]
+    cfg = VALIDER[dataset_type]
     attack = load_attack(**cfg)
     valider = AdversaryForValid(
-        model=model, attacker=attack, 
-        device=device, epsilon=epsilon
+        model=model, attacker=attack, device=device
     )
     return valider
 
