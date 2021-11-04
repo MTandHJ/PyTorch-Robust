@@ -60,10 +60,8 @@ else:
     linf_cfg = (
         dict(attack="fgsm", steps=50, stepsize=0.02, epsilon=8/255),
         dict(attack="fgsm", steps=50, stepsize=0.02, epsilon=16/255),
-        dict(attack="pgd-linf", steps=10, stepsize=0.25, epsilon=8/255),
-        dict(attack="pgd-linf", steps=10, stepsize=0.25, epsilon=16/255),
-        dict(attack="pgd-linf", steps=20, stepsize=0.1, epsilon=8/255),
-        dict(attack="pgd-linf", steps=20, stepsize=0.1, epsilon=16/255),
+        dict(attack="pgd-linf", steps=20, stepsize=0.25, epsilon=8/255),
+        dict(attack="pgd-linf", steps=20, stepsize=0.25, epsilon=16/255),
         dict(attack="pgd-linf", steps=40, stepsize=0.1, epsilon=8/255),
         dict(attack="pgd-linf", steps=40, stepsize=0.1, epsilon=16/255),
         dict(attack="deepfool-linf", steps=50, stepsize=0.02, epsilon=8/255),

@@ -3,12 +3,12 @@
 
 from typing import Tuple
 import argparse
+
 from src.loadopts import *
 from src.utils import timemeter
 
 
-
-METHOD = "TRADES"
+METHOD = "ALP"
 SAVE_FREQ = 5
 FMT = "{description}={leverage}={learning_policy}-{optimizer}-{lr}-{weight_decay}" \
         "={attack}-{epsilon:.4f}-{stepsize}-{steps}" \
@@ -18,14 +18,17 @@ parser = argparse.ArgumentParser()
 parser.add_argument("model", type=str)
 parser.add_argument("dataset", type=str)
 
+# coefficient of penalty
+parser.add_argument("--leverage", type=float, default=.5)
+
 # adversarial training settings
-parser.add_argument("--leverage", type=float, default=6.)
-parser.add_argument("--attack", type=str, default="pgd-linf-kl")
+parser.add_argument("--attack", type=str, default="pgd-linf")
 parser.add_argument("--epsilon", type=float, default=8/255)
-parser.add_argument("--stepsize", type=float, default=0.007)
+parser.add_argument("--stepsize", type=float, default=2/255)
 parser.add_argument("--steps", type=int, default=10)
 
 # basic settings
+parser.add_argument("--loss", type=str, default="cross_entropy")
 parser.add_argument("--optimizer", type=str, choices=("sgd", "adam"), default="sgd")
 parser.add_argument("-mom", "--momentum", type=float, default=0.9,
                 help="the momentum used for SGD")
@@ -66,7 +69,6 @@ opts = parser.parse_args()
 opts.description = FMT.format(**opts.__dict__)
 
 
-
 @timemeter("Setup")
 def load_cfg() -> Tuple[Config, str]:
     from src.dict2obj import Config
@@ -75,7 +77,7 @@ def load_cfg() -> Tuple[Config, str]:
     from models.base import ADArch
 
     cfg = Config()
-   
+
     # generate the path for logging information and saving parameters
     cfg['info_path'], cfg['log_path'] = generate_path(
         method=METHOD, dataset_type=opts.dataset, 
@@ -87,7 +89,7 @@ def load_cfg() -> Tuple[Config, str]:
         log2file=opts.log2file, 
         log2console=opts.log2console
     )
-
+    
     set_seed(opts.seed)
 
     # the model and other settings for training
@@ -146,7 +148,7 @@ def load_cfg() -> Tuple[Config, str]:
 
     cfg['coach'] = Coach(
         model=model,
-        loss_func=None, 
+        loss_func=load_loss_func(opts.loss), 
         optimizer=optimizer, 
         learning_policy=learning_policy
     )
@@ -218,7 +220,7 @@ def main(
                 acc_nat, acc_rob = evaluate(validloader, prefix="Valid", epoch=epoch)
                 coach.check_best(acc_nat, acc_rob, info_path, epoch=epoch)
 
-        running_loss = coach.trades(trainloader, attacker, leverage=opts.leverage, epoch=epoch)
+        running_loss = coach.alp(trainloader, attacker, leverage=opts.leverage, epoch=epoch)
 
     # save the model
     coach.save(info_path)
@@ -234,7 +236,6 @@ def main(
     rob_logger.plotter.save(log_path)
 
 
-
 if __name__ ==  "__main__":
     from src.utils import readme
     cfg = load_cfg()
@@ -243,3 +244,6 @@ if __name__ ==  "__main__":
     readme(cfg.log_path, opts, mode="a")
 
     main(**cfg)
+
+
+

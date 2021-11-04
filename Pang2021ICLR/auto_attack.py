@@ -4,7 +4,8 @@ from typing import Tuple
 import torch
 import argparse
 from src.loadopts import *
-from src.config import SAVED_FILENAME
+from src.config import SAVED_FILENAME, DEVICE
+from src.utils import timemeter
 from autoattack import AutoAttack
 
 
@@ -37,10 +38,11 @@ opts = parser.parse_args()
 opts.description = FMT.format(**opts.__dict__)
 
 
-
+@timemeter("Setup")
 def load_cfg() -> Tuple[Config, str]:
     from src.dict2obj import Config
-    from src.utils import gpu, load, set_seed, set_logger
+    from src.utils import load, set_seed, set_logger
+    from models.base import ADArch
 
     cfg = Config()
 
@@ -59,13 +61,12 @@ def load_cfg() -> Tuple[Config, str]:
 
     # load the model
     model = load_model(opts.model)(num_classes=get_num_classes(opts.dataset))
-    model.set_normalizer(load_normalizer(opts.dataset))
-    device, model = gpu(model)
+    mean, std = load_normalizer(opts.dataset)
+    model = ADArch(model=model, mean=mean, std=std)
     load(
         model=model, 
         path=opts.info_path,
-        filename=opts.filename,
-        device=device
+        filename=opts.filename
     )
     model.eval()
 
@@ -91,12 +92,13 @@ def load_cfg() -> Tuple[Config, str]:
         norm=opts.norm,
         eps=opts.epsilon,
         version=opts.version,
-        device=device
+        device=DEVICE,
     )
 
     return cfg, log_path
 
 
+@timemeter('Main')
 def main(attacker, data, targets):
     attacker.run_standard_evaluation(data, targets, bs=opts.batch_size)
 

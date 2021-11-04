@@ -8,24 +8,17 @@ from src.utils import timemeter
 
 
 
-METHOD = "TRADES"
+METHOD = "STD"
 SAVE_FREQ = 5
-FMT = "{description}={leverage}={learning_policy}-{optimizer}-{lr}-{weight_decay}" \
-        "={attack}-{epsilon:.4f}-{stepsize}-{steps}" \
+FMT = "{description}={learning_policy}-{optimizer}-{lr}-{weight_decay}" \
         "={batch_size}={transform}"
 
 parser = argparse.ArgumentParser()
 parser.add_argument("model", type=str)
 parser.add_argument("dataset", type=str)
 
-# adversarial training settings
-parser.add_argument("--leverage", type=float, default=6.)
-parser.add_argument("--attack", type=str, default="pgd-linf-kl")
-parser.add_argument("--epsilon", type=float, default=8/255)
-parser.add_argument("--stepsize", type=float, default=0.007)
-parser.add_argument("--steps", type=int, default=10)
-
 # basic settings
+parser.add_argument("--loss", type=str, default="cross_entropy")
 parser.add_argument("--optimizer", type=str, choices=("sgd", "adam"), default="sgd")
 parser.add_argument("-mom", "--momentum", type=float, default=0.9,
                 help="the momentum used for SGD")
@@ -33,12 +26,12 @@ parser.add_argument("-beta1", "--beta1", type=float, default=0.9,
                 help="the first beta argument for Adam")
 parser.add_argument("-beta2", "--beta2", type=float, default=0.999,
                 help="the second beta argument for Adam")
-parser.add_argument("-wd", "--weight_decay", type=float, default=5e-4,
+parser.add_argument("-wd", "--weight_decay", type=float, default=2e-4,
                 help="weight decay")
 parser.add_argument("-lr", "--lr", "--LR", "--learning_rate", type=float, default=0.1)
-parser.add_argument("-lp", "--learning_policy", type=str, default="Pang2021ICLR", 
+parser.add_argument("-lp", "--learning_policy", type=str, default="STD", 
                 help="learning rate schedule defined in config.py")
-parser.add_argument("--epochs", type=int, default=110)
+parser.add_argument("--epochs", type=int, default=164)
 parser.add_argument("-b", "--batch_size", type=int, default=128)
 parser.add_argument("--transform", type=str, default='default', 
                 help="the data augmentations which will be applied during training.")
@@ -50,7 +43,7 @@ parser.add_argument("--ratio", type=float, default=.0,
 # eval
 parser.add_argument("--eval-train", action="store_true", default=False)
 parser.add_argument("--eval-valid", action="store_false", default=True)
-parser.add_argument("--eval-freq", type=int, default=1,
+parser.add_argument("--eval-freq", type=int, default=5,
                 help="for valid dataset only")
 
 parser.add_argument("--resume", action="store_true", default=False)
@@ -70,12 +63,12 @@ opts.description = FMT.format(**opts.__dict__)
 @timemeter("Setup")
 def load_cfg() -> Tuple[Config, str]:
     from src.dict2obj import Config
-    from src.base import Coach, AdversaryForTrain
+    from src.base import Coach
     from src.utils import set_seed, load_checkpoint, set_logger
     from models.base import ADArch
 
     cfg = Config()
-   
+    
     # generate the path for logging information and saving parameters
     cfg['info_path'], cfg['log_path'] = generate_path(
         method=METHOD, dataset_type=opts.dataset, 
@@ -146,25 +139,29 @@ def load_cfg() -> Tuple[Config, str]:
 
     cfg['coach'] = Coach(
         model=model,
-        loss_func=None, 
-        optimizer=optimizer, 
+        loss_func=load_loss_func(opts.loss), 
+        optimizer=optimizer,
         learning_policy=learning_policy
     )
 
-    # set the attack
-    attack = load_attack(
-        attack_type=opts.attack, epsilon=opts.epsilon,
-        steps=opts.steps, stepsize=opts.stepsize,
-        random_start=True
-    )
-    cfg['attacker'] = AdversaryForTrain(
-        model=model, attacker=attack
-    )
+    # for validation
     cfg['valider'] = load_valider(
         model=model, dataset_type=opts.dataset
     )
-
     return cfg
+
+
+@timemeter("Evaluation")
+def evaluate(
+    valider, dataloader, 
+    acc_logger, rob_logger, logger, 
+    prefix='Valid', epoch = 8888
+):
+    acc_nat, acc_adv = valider.evaluate(dataloader)
+    logger.info(f"{prefix} >>> [TA: {acc_nat:.3%}]    [RA: {acc_adv:.3%}]")
+    getattr(acc_logger, prefix.lower())(data=acc_nat, T=epoch)
+    getattr(rob_logger, prefix.lower())(data=acc_adv, T=epoch)
+    return acc_nat, acc_adv
 
 
 def preparation(valider):
@@ -196,7 +193,7 @@ def preparation(valider):
 
 @timemeter("Main")
 def main(
-    coach, attacker, valider, 
+    coach, valider, 
     trainloader, validloader, start_epoch, 
     info_path, log_path
 ):  
@@ -218,7 +215,7 @@ def main(
                 acc_nat, acc_rob = evaluate(validloader, prefix="Valid", epoch=epoch)
                 coach.check_best(acc_nat, acc_rob, info_path, epoch=epoch)
 
-        running_loss = coach.trades(trainloader, attacker, leverage=opts.leverage, epoch=epoch)
+        running_loss = coach.train(trainloader, epoch=epoch)
 
     # save the model
     coach.save(info_path)
@@ -234,7 +231,6 @@ def main(
     rob_logger.plotter.save(log_path)
 
 
-
 if __name__ ==  "__main__":
     from src.utils import readme
     cfg = load_cfg()
@@ -243,3 +239,4 @@ if __name__ ==  "__main__":
     readme(cfg.log_path, opts, mode="a")
 
     main(**cfg)
+

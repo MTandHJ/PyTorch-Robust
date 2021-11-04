@@ -10,7 +10,7 @@ from src.utils import timemeter
 
 METHOD = "AT"
 SAVE_FREQ = 5
-FMT = "{description}={learning_policy}-{optimizer}-{lr}" \
+FMT = "{description}={learning_policy}-{optimizer}-{lr}-{weight_decay}" \
         "={attack}-{epsilon:.4f}-{stepsize}-{steps}" \
         "={batch_size}={transform}"
 
@@ -21,8 +21,7 @@ parser.add_argument("dataset", type=str)
 # adversarial training settings
 parser.add_argument("--attack", type=str, default="pgd-linf")
 parser.add_argument("--epsilon", type=float, default=8/255)
-parser.add_argument("--stepsize", type=float, default=0.25, 
-                help="pgd:rel_stepsize, cwl2:step_size, deepfool:overshoot, bb:lr")
+parser.add_argument("--stepsize", type=float, default=2/255)
 parser.add_argument("--steps", type=int, default=10)
 
 # basic settings
@@ -37,12 +36,12 @@ parser.add_argument("-beta2", "--beta2", type=float, default=0.999,
 parser.add_argument("-wd", "--weight_decay", type=float, default=5e-4,
                 help="weight decay")
 parser.add_argument("-lr", "--lr", "--LR", "--learning_rate", type=float, default=0.1)
-parser.add_argument("-lp", "--learning_policy", type=str, default="default", 
+parser.add_argument("-lp", "--learning_policy", type=str, default="Pang2021ICLR", 
                 help="learning rate schedule defined in config.py")
 parser.add_argument("--epochs", type=int, default=110)
 parser.add_argument("-b", "--batch_size", type=int, default=128)
 parser.add_argument("--transform", type=str, default='default', 
-                help="the data augmentation which will be applied during training.")
+                help="the data augmentations which will be applied during training.")
 
 # the ratio of valid dataset
 parser.add_argument("--ratio", type=float, default=.0,
@@ -51,7 +50,7 @@ parser.add_argument("--ratio", type=float, default=.0,
 # eval
 parser.add_argument("--eval-train", action="store_true", default=False)
 parser.add_argument("--eval-valid", action="store_false", default=True)
-parser.add_argument("--eval-freq", type=int, default=5,
+parser.add_argument("--eval-freq", type=int, default=1,
                 help="for valid dataset only")
 
 parser.add_argument("--resume", action="store_true", default=False)
@@ -62,7 +61,7 @@ parser.add_argument("--log2file", action="store_false", default=True,
 parser.add_argument("--log2console", action="store_false", default=True,
                 help="False: remove console handler if log2file is True ...")
 parser.add_argument("--seed", type=int, default=1)
-parser.add_argument("-m", "--description", type=str, default="AT")
+parser.add_argument("-m", "--description", type=str, default=METHOD)
 opts = parser.parse_args()
 opts.description = FMT.format(**opts.__dict__)
 
@@ -72,7 +71,8 @@ opts.description = FMT.format(**opts.__dict__)
 def load_cfg() -> Tuple[Config, str]:
     from src.dict2obj import Config
     from src.base import Coach, AdversaryForTrain
-    from src.utils import gpu, set_seed, load_checkpoint, set_logger
+    from src.utils import set_seed, load_checkpoint, set_logger
+    from models.base import ADArch
 
     cfg = Config()
 
@@ -92,37 +92,37 @@ def load_cfg() -> Tuple[Config, str]:
 
     # the model and other settings for training
     model = load_model(opts.model)(num_classes=get_num_classes(opts.dataset))
-    model.set_normalizer(load_normalizer(opts.dataset))
-    device, model = gpu(model)
+    mean, std = load_normalizer(opts.dataset)
+    model = ADArch(model=model, mean=mean, std=std)
 
     # load the dataset
-    trainset = load_dataset(
-        dataset_type=opts.dataset, 
-        transform=opts.transform, 
-        train=True
-    )
-    cfg['trainloader'], cfg['validloader'] = load_dataloader(
-        dataset=trainset, 
-        batch_size=opts.batch_size, 
-        train=True,
+    trainset, validset = load_dataset(
+        dataset_type=opts.dataset,
+        transforms=opts.transform,
         ratio=opts.ratio,
-        show_progress=opts.progress
+        train=True
     )
     if opts.ratio == 0:
         logger.warning(
-            "[Warning] The ratio of validation is 0. Use testset instead."
+            "[Warning] The ratio of the validation set is 0. Use testset instead."
         )
-        testset = load_dataset(
+        validset = load_dataset(
             dataset_type=opts.dataset,
-            transform='null',
+            transforms="tensor,none",
             train=False
         )
-        cfg['validloader'] = load_dataloader(
-            dataset=testset,
-            batch_size=opts.batch_size,
-            train=False,
-            show_progress=opts.progress
-        )
+    cfg['trainloader'] = load_dataloader(
+        dataset=trainset,
+        batch_size=opts.batch_size,
+        train=True,
+        show_progress=opts.progress
+    )
+    cfg['validloader'] = load_dataloader(
+        dataset=validset,
+        batch_size=opts.batch_size,
+        train=False,
+        show_progress=opts.progress
+    )
 
     # load the optimizer and learning_policy
     optimizer = load_optimizer(
@@ -146,7 +146,7 @@ def load_cfg() -> Tuple[Config, str]:
         cfg['start_epoch'] = 0
 
     cfg['coach'] = Coach(
-        model=model, device=device, 
+        model=model,
         loss_func=load_loss_func(opts.loss), 
         optimizer=optimizer, 
         learning_policy=learning_policy
@@ -154,18 +154,15 @@ def load_cfg() -> Tuple[Config, str]:
 
     # set the attack
     attack = load_attack(
-        attack_type=opts.attack,
-        stepsize=opts.stepsize, 
-        steps=opts.steps
+        attack_type=opts.attack, epsilon=opts.epsilon,
+        steps=opts.steps, stepsize=opts.stepsize,
+        random_start=True
     )
-
     cfg['attacker'] = AdversaryForTrain(
-        model=model, attacker=attack, 
-        device=device, epsilon=opts.epsilon
+        model=model, attacker=attack
     )
-
     cfg['valider'] = load_valider(
-        model=model, device=device, dataset_type=opts.dataset
+        model=model, dataset_type=opts.dataset
     )
 
     return cfg

@@ -17,13 +17,15 @@ examples.
 
 ### CIFAR-10
 
-    python AT.py resnet18 cifar10 -lr=0.1 -lp=default --epochs=110 -wd=5e-4 
-    python TRADES.py resnet18 cifar10 -lr=0.1 -lp=default --epochs=110 -wd=5e-4 --leverage=6
+    python AT.py resnet18 cifar10 -lr=0.1 -lp=Pang2021ICLR --epochs=110 -wd=5e-4 
+    python ALP.py resnet18 cifar10 -lr=0.1 -lp=Pang2021ICLR --epochs=110 -wd=5e-4 
+    python TRADES.py resnet18 cifar10 -lr=0.1 -lp=Pang2021ICLR --epochs=110 -wd=5e-4 --leverage=6
 
 ### CIFAR-100
 
-    python AT.py resnet18 cifar100 -lr=0.1 -lp=default --epochs=110 -wd=5e-4 
-    python TRADES.py resnet18 cifar100 -lr=0.1 -lp=default --epochs=110 -wd=5e-4 --leverage=6
+    python AT.py resnet18 cifar100 -lr=0.1 -lp=Pang2021ICLR --epochs=110 -wd=5e-4 
+    python ALP.py resnet18 cifar100 -lr=0.1 -lp=Pang2021ICLR --epochs=110 -wd=5e-4 
+    python TRADES.py resnet18 cifar100 -lr=0.1 -lp=Pang2021ICLR --epochs=110 -wd=5e-4 --leverage=6
 
 
 
