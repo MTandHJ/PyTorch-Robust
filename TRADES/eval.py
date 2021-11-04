@@ -3,34 +3,38 @@
 
 import os
 import argparse
+from src.config import SAVED_FILENAME
 
 
 parser = argparse.ArgumentParser()
 parser.add_argument("model", type=str)
 parser.add_argument("dataset", type=str)
 parser.add_argument("path", type=str)
+parser.add_argument("--filename", type=str, default=SAVED_FILENAME)
 parser.add_argument("--atype", choices=('both', 'wb', 'aa'), default='both')
 parser.add_argument("--progress", action="store_true", default=False)
 parser.add_argument("--norm", choices=("linf", "l2", "l1"), default=("linf", "l2", "l1"))
 opts = parser.parse_args()
 
-fmt_wb = "python white_box_attack.py {model} {dataset} {path} " \
+fmt_wb = "python white_box_attack.py {model} {dataset} {path} --filename={filename} " \
         "--attack={attack} --steps={steps} --stepsize={stepsize} --epsilon_min={epsilon} {progress}"
 
-fmt_aa = "python auto_attack.py {model} {dataset} {path} " \
+fmt_aa = "python auto_attack.py {model} {dataset} {path} --filename={filename} " \
         "--epsilon={epsilon} --norm={norm}"
 
 basic_cfg_wb = dict(
     model=opts.model,
     dataset=opts.dataset,
     path=opts.path,
+    filename=opts.filename,
     progress="--progress" if opts.progress else ""
 )
 
 basic_cfg_aa = dict(
     model=opts.model,
     dataset=opts.dataset,
-    path=opts.path
+    path=opts.path,
+    filename=opts.filename
 )
 
 if opts.dataset in ("mnist", "fashionmnist"):
@@ -56,10 +60,8 @@ else:
     linf_cfg = (
         dict(attack="fgsm", steps=50, stepsize=0.02, epsilon=8/255),
         dict(attack="fgsm", steps=50, stepsize=0.02, epsilon=16/255),
-        dict(attack="pgd-linf", steps=10, stepsize=0.25, epsilon=8/255),
-        dict(attack="pgd-linf", steps=10, stepsize=0.25, epsilon=16/255),
-        dict(attack="pgd-linf", steps=20, stepsize=0.1, epsilon=8/255),
-        dict(attack="pgd-linf", steps=20, stepsize=0.1, epsilon=16/255),
+        dict(attack="pgd-linf", steps=20, stepsize=0.25, epsilon=8/255),
+        dict(attack="pgd-linf", steps=20, stepsize=0.25, epsilon=16/255),
         dict(attack="pgd-linf", steps=40, stepsize=0.1, epsilon=8/255),
         dict(attack="pgd-linf", steps=40, stepsize=0.1, epsilon=16/255),
         dict(attack="deepfool-linf", steps=50, stepsize=0.02, epsilon=8/255),
@@ -91,7 +93,6 @@ else:
         dict(epsilon=16/255, norm="Linf"),
         dict(epsilon=0.5, norm="L2"),
     )
-
 
 
 

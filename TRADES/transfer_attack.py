@@ -48,8 +48,9 @@ opts.description = FMT.format(**opts.__dict__)
 @timemeter("Setup")
 def load_cfg() -> 'Config':
     from src.dict2obj import Config
-    from src.base import FBDefense, AdversaryForValid
-    from src.utils import gpu, load, set_seed, set_logger
+    from src.base import FBDefense, FBAdversary
+    from src.utils import load, set_seed, set_logger
+    from models.base import ADArch
 
     cfg = Config()
     
@@ -72,24 +73,22 @@ def load_cfg() -> 'Config':
 
     # load the source_model
     source_model = load_model(opts.source_model)(num_classes=get_num_classes(opts.dataset))
-    source_model.set_normalizer(load_normalizer(opts.dataset))
-    device, source_model = gpu(source_model)
+    mean, std = load_normalizer(opts.dataset)
+    source_model = ADArch(model=source_model, mean=mean, std=std)
     load(
-        model=source_model, 
+        model=source_model,
         path=opts.source_path,
-        filename=opts.source_filename,
-        device=device
+        filename=opts.source_filename
     )
 
     # load the target_model
     target_model = load_model(opts.target_model)(num_classes=get_num_classes(opts.dataset))
-    target_model.set_normalizer(load_normalizer(opts.dataset))
-    device, target_model = gpu(target_model)
+    mean, std = load_normalizer(opts.dataset)
+    target_model = ADArch(model=target_model, mean=mean, std=std)
     load(
         model=target_model, 
         path=opts.target_path,
-        filename=opts.target_filename,
-        device=device
+        filename=opts.target_filename
     )
 
     # load the testset
@@ -106,20 +105,20 @@ def load_cfg() -> 'Config':
     )
 
     # set the attacker
-    attack = load_attack(
+    attack = load_fb_attack(
         attack_type=opts.attack,
         stepsize=opts.stepsize, 
         steps=opts.steps
     )
 
-    cfg['attacker'] = AdversaryForValid(
+    cfg['attacker'] = FBAdversary(
         model=source_model, attacker=attack, 
-        device=device, epsilon=opts.epsilon
+        epsilon=opts.epsilon
     )
 
     # set the defender ...
     cfg['defender'] = FBDefense(
-        model=target_model, device=device
+        model=target_model
     )
 
     return cfg
