@@ -9,7 +9,7 @@ import os
 
 from models.base import AdversarialDefensiveModule
 from .utils import AverageMeter, ProgressMeter, timemeter, getLogger
-from .loss_zoo import cross_entropy, kl_divergence, lploss
+from .loss_zoo import cross_entropy, kl_divergence, lploss, mse_loss
 from .config import SAVED_FILENAME, PRE_BESTNAT, PRE_BESTROB, \
                         BOUNDS, PREPROCESSING, DEVICE
 
@@ -155,7 +155,7 @@ class Coach:
             logits_adv = self.model(clipped)
             loss_nat = self.loss_func(logits_nat, labels)
             loss_adv = self.loss_func(logits_adv, labels)
-            loss_reg = lploss(logits_nat - logits_adv)
+            loss_reg = mse_loss(logits_adv, logits_nat)
             loss = loss_nat + loss_adv + leverage * loss_reg
 
             self.optimizer.zero_grad()

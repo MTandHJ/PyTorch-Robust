@@ -48,6 +48,7 @@ class ADArch(AdversarialDefensiveModule):
         device: torch.device = DEVICE
     ) -> None:
         super().__init__()
+        self.arch = model
         if torch.cuda.device_count() > 1:
             self.model = DataParallel(model)
         else:
@@ -56,10 +57,10 @@ class ADArch(AdversarialDefensiveModule):
         self.mean, self.std = mean.to(device), std.to(device)
 
     def state_dict(self, *args, **kwargs):
-        return self.model.state_dict(*args, **kwargs)
+        return self.arch.state_dict(*args, **kwargs)
     
     def load_state_dict(self, *args, **kwargs):
-        return self.model.load_state_dict(*args, **kwargs)
+        return self.arch.load_state_dict(*args, **kwargs)
 
     def _normalize(self, x: torch.Tensor) -> torch.Tensor:
         return (x - self.mean) / self.std

@@ -1,10 +1,8 @@
 
 
-from typing import Optional, Union, Iterable
+from typing import Union, Iterable
 import torch
 import torch.nn.functional as F
-
-
 
 
 def cross_entropy(
@@ -39,6 +37,13 @@ def kl_divergence(
     inputs = F.log_softmax(logits, dim=-1)
     targets = F.softmax(targets, dim=-1)
     return F.kl_div(inputs, targets, reduction=reduction)
+
+def mse_loss(
+    inputs: torch.Tensor,
+    targets: torch.Tensor,
+    reduction: str = "mean"
+) -> torch.Tensor:
+    return F.mse_loss(inputs, targets, reduction=reduction)
 
 def lploss(
     x: torch.Tensor,

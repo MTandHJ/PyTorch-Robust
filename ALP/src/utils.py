@@ -270,15 +270,21 @@ def import_pickle(file_: str) -> Dict:
         if fh is not None:
             fh.close()
 
-def set_seed(seed: int) -> None:
+
+def activate_benchmark(benchmark: bool) -> None:
     from torch.backends import cudnn
+    if benchmark:
+        getLogger().info(f"[Seed] >>> Activate benchmark")
+        cudnn.benchmark, cudnn.deterministic = True, False
+    else:
+        getLogger().info(f"[Seed] >>> Deactivate benchmark")
+        cudnn.benchmark, cudnn.deterministic = False, True
+
+def set_seed(seed: int) -> None:
     if seed == -1:
         seed = random.randint(0, 1024)
         logger = getLogger()
-        logger.info(f">>> Set seed randomly: {seed}")
-        cudnn.benchmark, cudnn.deterministic = True, False
-    else:
-        cudnn.benchmark, cudnn.deterministic = False, True
+        logger.info(f"[Seed] >>> Set seed randomly: {seed}")
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)

@@ -78,22 +78,24 @@ def load_model(model_type: str) -> Callable[..., torch.nn.Module]:
 
 def load_loss_func(loss_type: str) -> Callable:
     """
-    cross_entropy: the softmax cross entropy loss
+    cross_entropy: the cross entropy loss with logits
+    cross_entropy_softmax: the cross entropy loss with probs
     kl_loss: kl divergence
+    mse_loss: MSE
     """
     loss_func: Callable[..., torch.Tensor]
     if loss_type == "cross_entropy":
         from .loss_zoo import cross_entropy
         loss_func = cross_entropy
-    elif loss_type == "contrastive":
-        from .loss_zoo import contrastive_loss
-        loss_func = contrastive_loss
+    elif loss_type == "cross_entropy_softmax":
+        from .loss_zoo import cross_entropy_softmax
+        loss_func = cross_entropy_softmax
     elif loss_type == "kl_loss":
         from .loss_zoo import kl_divergence
         loss_func = kl_divergence
-    elif loss_type == "margin_loss":
-        from .loss_zoo import margin_loss
-        loss_func = margin_loss
+    elif loss_type == "mse_loss":
+        from .loss_zoo import mse_loss
+        loss_func = mse_loss
     else:
         raise LossNotDefineError(f"Loss {loss_type} is not defined.\n" \
                     f"Refer to the following: {load_loss_func.__doc__}")
