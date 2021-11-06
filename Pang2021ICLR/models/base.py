@@ -73,7 +73,7 @@ class ADArch(AdversarialDefensiveModule):
 
 if __name__ == "__main__":
     
-    model = ADArch()
+    model = AdversarialDefensiveModule()
     model.child1 = AdversarialDefensiveModule()
     model.child2 = AdversarialDefensiveModule()
     model = DataParallel(model)
