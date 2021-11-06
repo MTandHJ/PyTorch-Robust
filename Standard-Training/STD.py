@@ -54,6 +54,8 @@ parser.add_argument("--log2file", action="store_false", default=True,
 parser.add_argument("--log2console", action="store_false", default=True,
                 help="False: remove console handler if log2file is True ...")
 parser.add_argument("--seed", type=int, default=1)
+parser.add_argument("--benchmark", action="store_false", default=True, 
+                help="cudnn.benchmark == True ?")
 parser.add_argument("-m", "--description", type=str, default=METHOD)
 opts = parser.parse_args()
 opts.description = FMT.format(**opts.__dict__)
@@ -64,7 +66,7 @@ opts.description = FMT.format(**opts.__dict__)
 def load_cfg() -> Tuple[Config, str]:
     from src.dict2obj import Config
     from src.base import Coach
-    from src.utils import set_seed, load_checkpoint, set_logger
+    from src.utils import set_seed, activate_benchmark, load_checkpoint, set_logger
     from models.base import ADArch
 
     cfg = Config()
@@ -81,6 +83,7 @@ def load_cfg() -> Tuple[Config, str]:
         log2console=opts.log2console
     )
 
+    activate_benchmark(opts.benchmark)
     set_seed(opts.seed)
 
     # the model and other settings for training
