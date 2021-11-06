@@ -105,7 +105,7 @@ class LinfPGDKLdiv(LinfPGD):
 
     def get_random_start(self, x: torch.Tensor) -> torch.Tensor:
         delta = torch.randn_like(x) * 0.001 # TRADES adopts normal distribution
-        return x + delta
+        return delta
 
     def loss_fn(self, logits: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
         return kl_divergence(logits, targets, reduction='sum')
