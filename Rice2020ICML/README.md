@@ -25,11 +25,32 @@
 
 
 
-We report the results on the best checkpoint according to the validation set.
+### CIFAR10
+
+AT:
+
+| $\ell_{\infty}$ |   Net    |      | Clean |  AA   |
+| :-------------: | :------: | :--: | :---: | :---: |
+|      8/255      | ResNet18 | last | 84.96 | 41.23 |
+|      8/255      | ResNet18 | best | 83.25 | 47.63 |
 
 
 
-| $\epsilon$ |   Net    |      LP      | Nat(%) | PGD-40 |  AA   |
-| :--------: | :------: | :----------: | :----: | :----: | :---: |
-|   8/255    | resnet18 | Rice2020ICML | 82.09  | 52.05  | 47.86 |
+ALP:
+
+| $\ell_{\infty}$ |   Net    |      | Clean |  AA   |
+| :-------------: | :------: | :--: | :---: | :---: |
+|      8/255      | ResNet18 | last | 86.08 | 43.19 |
+|      8/255      | ResNet18 | best | 85.98 | 46.25 |
+
+
+
+TRADES:
+
+| $\ell_{\infty}$ |   Net    |      | Clean |  AA   |
+| :-------------: | :------: | :--: | :---: | :---: |
+|      8/255      | ResNet18 | last | 83.78 | 47.30 |
+|      8/255      | ResNet18 | best | 83.63 | 49.19 |
+
+
 

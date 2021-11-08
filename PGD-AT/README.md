@@ -26,6 +26,23 @@
 
 
 
+## Latest Version
+
+
+
+| $\ell_{\infty}$ |   Net    |      | Clean |  AA   |
+| :-------------: | :------: | :--: | :---: | :---: |
+|      8/255      | ResNet18 | last | 84.74 | 41.20 |
+|      8/255      | ResNet18 | best | 84.26 | 46.82 |
+
+
+
+
+
+
+
+
+
 ## Evaluation
 
 
