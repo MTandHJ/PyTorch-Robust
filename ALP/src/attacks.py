@@ -83,10 +83,10 @@ class LinfPGD(BasePGD):
 
 class L2PGD(BasePGD):
     EPS = 1e-12
-    def get_random_start(self, x: torch.Tensor) -> torch.Tensor:
-        delta = torch.randn_like(x.flatten(1))
+    def get_random_start(self, x0: torch.Tensor) -> torch.Tensor:
+        delta = torch.randn_like(x0.flatten(1))
         n = delta.norm(p=2, dim=1)
-        n = self.atleast_kd(n, x.ndim)
+        n = self.atleast_kd(n, x0.ndim)
         r = torch.rand_like(n) # r = 1 for some implementations
         delta *= r / n * self.epsilon
         return delta
@@ -103,9 +103,8 @@ class L2PGD(BasePGD):
 
 class LinfPGDKLdiv(LinfPGD):
 
-    def get_random_start(self, x: torch.Tensor) -> torch.Tensor:
-        delta = torch.randn_like(x) * 0.001 # TRADES adopts normal distribution
-        return delta
+    def get_random_start(self, x0: torch.Tensor) -> torch.Tensor:
+        return torch.randn_like(x0) * 0.001 # TRADES adopts normal distribution
 
     def loss_fn(self, logits: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
         return kl_divergence(logits, targets, reduction='sum')
@@ -130,10 +129,10 @@ class LinfPGDKLdiv(LinfPGD):
 
 class L2PGDKLdiv(L2PGD):
 
-    def get_random_start(self, x: torch.Tensor) -> torch.Tensor:
-        delta = torch.randn_like(x.flatten(1)) * 0.001
+    def get_random_start(self, x0: torch.Tensor) -> torch.Tensor:
+        delta = torch.randn_like(x0.flatten(1)) * 0.001
         n = delta.norm(p=2, dim=1)
-        n = self.atleast_kd(n, x.ndim)
+        n = self.atleast_kd(n, x0.ndim)
         r = 1. # r = 1 for some implementations
         delta *= r / n * self.epsilon
         return delta
