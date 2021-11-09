@@ -1,5 +1,5 @@
-This repo is built for consistent comparisons of defense methods. However, I can not make sure these implementations are identically consistent with the official codes. In addition, you may find some tiny differences of the design logic for each defense method. This is because I usually implement a new method based on the latest framework in [here](https://github.com/MTandHJ/rfk).
 
+This repo is built for easier comparisons of defense methods. However, I can not make sure these implementations are identically consistent with the official codes. In addition, you may find some tiny differences of the design logic behind each defense method. This is because I implement a new method based on the latest framework in [here](https://github.com/MTandHJ/rfk).
 
 
 ## Usage
@@ -36,7 +36,7 @@ This repo is built for consistent comparisons of defense methods. However, I can
 
 
 
-For security purposes, you should manually specify the path of data in config.py, or reset the 'download' in '_dataset' (loadopts.py) as True.
+For security purposes, you should manually specify the path of data in config.py, or reset the 'DOWNLOAD'  as True.
 
 
 
