@@ -50,7 +50,8 @@ class BasePGD:
 
         if self.random_start:
             x = x0 + self.get_random_start(x0)
-            x = torch.clamp(x, *self.bounds)
+            # MART excludes the clip operation at first
+            # x = torch.clamp(x, *self.bounds)
         else:
             x = x0
 
