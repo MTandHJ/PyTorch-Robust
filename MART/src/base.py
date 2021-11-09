@@ -75,7 +75,7 @@ class Coach:
     def save(self, path: str, filename: str = SAVED_FILENAME) -> None:
         torch.save(self.model.state_dict(), os.path.join(path, filename))
 
-     @timemeter("MART/Epoch")
+    @timemeter("MART/Epoch")
     def train(
         self, 
         trainloader: Iterable[Tuple[torch.Tensor, torch.Tensor]], 
@@ -89,7 +89,7 @@ class Coach:
             inputs = inputs.to(self.device)
             labels = labels.to(self.device)
 
-            _, clipped, _ = attacker(inputs, labels)
+            clipped = attacker(inputs, labels)
             
             self.model.train()
             logits_nat = self.model(inputs)

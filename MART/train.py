@@ -22,7 +22,7 @@ parser.add_argument("--leverage", type=float, default=5.,
                 help="the alias of beta")
 
 # adversarial training settings
-parser.add_argument("--attack", type=str, default="pgd-linf-kl")
+parser.add_argument("--attack", type=str, default="pgd-linf")
 parser.add_argument("--epsilon", type=float, default=8/255)
 parser.add_argument("--stepsize", type=float, default=0.007)
 parser.add_argument("--steps", type=int, default=10)
