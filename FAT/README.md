@@ -28,8 +28,8 @@
 |           | $\ell_{\infty}$ |   Net    |      | Clean |  AA   |
 | :-------: | :-------------: | :------: | :--: | :---: | :---: |
 |    AT     |      8/255      | ResNet18 | last | 87.34 | 41.56 |
-|    AT     |      8/255      | ResNet18 | best |       |       |
-| TRADES(6) |      8/255      | ResNet18 | last |       |       |
+|    AT     |      8/255      | ResNet18 | best | 87.55 |       |
+| TRADES(6) |      8/255      | ResNet18 | last | 83.09 |       |
 | TRADES(6) |      8/255      | ResNet18 | best |       |       |
 
 
