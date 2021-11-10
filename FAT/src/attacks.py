@@ -167,7 +167,7 @@ class L2PGDKLdiv(L2PGD):
         return x
 
 
-class FriendlyPGD(BasePGD):
+class FriendlyPGD(LinfPGD):
 
     def __init__(
         self, epsilon: float, steps: int, stepsize: float, tau: int = 0,
@@ -253,7 +253,32 @@ class FriendlyPGDKL(FriendlyPGD):
     def loss_fn(self, logits: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
         return kl_divergence(logits, targets, reduction='sum')
 
+    def attack(self, model: nn.Module, inputs: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
 
+        x0 = inputs.clone()
+
+        with torch.no_grad():
+            targets = model(x0)
+
+        if self.random_start:
+            x = x0 + self.get_random_start(x0)
+            x = torch.clamp(x, *self.bounds)
+        else:
+            x = x0
+
+        tau_counts = torch.ones(x0.size(0), device=x0.device) * self.tau
+
+        for _ in range(self.steps):
+            tau_counts += self.which_to_attack(model, x, labels)
+            wta = tau_counts >= 0
+            if wta.sum() == 0:
+                break
+            grad = self.calc_grad(model, x[wta], targets[wta])
+            x[wta] = x[wta] + self.stepsize * self.normalize(grad)
+            x = self.project(x, x0)
+            x = torch.clamp(x, *self.bounds)
+
+        return x
 
 
 

@@ -259,15 +259,15 @@ class MixLR:
 
     def __init__(
         self, optimizer: torch.optim.Optimizer, base_lr: float,
-        milstones: Iterable, gammas: Iterable
+        milestones: Iterable, gammas: Iterable
     ) -> None:
 
-        assert len(milstones) == len(gammas), \
-            f"milstones and gammas should be the same length, but {len(milstones)} and {len(gammas)} received."
+        assert len(milestones) == len(gammas), \
+            f"milstones and gammas should be the same length, but {len(milestones)} and {len(gammas)} received."
         
         self.optimizer = optimizer
         self.base_lr = base_lr
-        self.milstones = milstones
+        self.milestones = milestones
         self.gammas = gammas
         self.cur_epoch = 0
 
@@ -279,8 +279,9 @@ class MixLR:
 
     def step(self):
         epoch = self.cur_epoch
-        for milstone, gamma in zip(self.milstones, self.gammas):
-            if epoch >= milstone:
+        lr = self.base_lr
+        for milestone, gamma in zip(self.milestones, self.gammas):
+            if epoch >= milestone:
                 lr = self.base_lr * gamma
         for param_group in self.optimizer.param_groups:
             param_group['lr'] = lr

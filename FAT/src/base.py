@@ -122,10 +122,7 @@ class Coach:
             inputs = inputs.to(self.device)
             labels = labels.to(self.device)
 
-            with torch.no_grad():
-                self.model.eval()
-                logits = self.model(inputs).detach()
-            inputs_adv = attacker(inputs, logits)
+            inputs_adv = attacker(inputs, labels)
             
             self.model.train()
             logits_nat = self.model(inputs)
@@ -172,6 +169,9 @@ class AdversaryForTrain(Adversary):
     def attack(self, inputs: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
         self.model.eval() # some methods require training mode
         return self.attacker(self.model, inputs, targets)
+
+    def adjust_tau(self, epoch: int):
+        self.attacker.adjust_tau(epoch)
 
 class AdversaryForValid(Adversary): 
 
