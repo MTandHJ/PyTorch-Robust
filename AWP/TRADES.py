@@ -171,6 +171,7 @@ def load_cfg() -> Tuple[Config, str]:
     cfg['coach'] = Coach(
         model=model,
         loss_func=None, 
+        awp_adversary=awp_adversary,
         optimizer=optimizer, 
         learning_policy=learning_policy
     )
