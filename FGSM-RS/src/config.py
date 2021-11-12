@@ -70,16 +70,16 @@ PIN_MEMORY = True
 BOUNDS = (0, 1) # for attacks
 PREPROCESSING = None # for fb.attacks.Attack
 MEANS = {
-    "mnist": [0,],
-    "fashionmnist": [0,],
+    "mnist": [0.,],
+    "fashionmnist": [0.,],
     'svhn': [0.5, 0.5, 0.5],
     "cifar10": [0.4914, 0.4824, 0.4467],
     "cifar100": [0.5071, 0.4867, 0.4408]
 }
 
 STDS = {
-    "mnist": [1,],
-    "fashionmnist": [1,],
+    "mnist": [1.,],
+    "fashionmnist": [1.,],
     'svhn': [0.5, 0.5, 0.5],
     "cifar10": [0.2471, 0.2435, 0.2617],
     "cifar100": [0.2675, 0.2565, 0.2761]
