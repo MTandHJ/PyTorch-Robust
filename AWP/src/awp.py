@@ -27,10 +27,11 @@ import torch
 from collections import OrderedDict
 import torch.nn as nn
 import torch.nn.functional as F
+from models.base import ADArch
 EPS = 1E-20
 
 
-def diff_in_weights(model, proxy):
+def diff_in_weights(model: ADArch, proxy: ADArch):
     diff_dict = OrderedDict()
     model_state_dict = model.state_dict()
     proxy_state_dict = proxy.state_dict()
@@ -43,10 +44,13 @@ def diff_in_weights(model, proxy):
     return diff_dict
 
 
-def add_into_weights(model, diff, coeff=1.0):
+def add_into_weights(model: ADArch, diff, coeff=1.0):
     names_in_diff = diff.keys()
     with torch.no_grad():
-        for name, param in model.named_parameters():
+        # XXX: the official code is 'model.named_parameters()' here,
+        # but we have to use 'model.arch.named_parameters()' due to the existing of ADArch.
+        # If not, the model will never be perturbed or restored.
+        for name, param in model.arch.named_parameters():
             if name in names_in_diff:
                 param.add_(coeff * diff[name])
 

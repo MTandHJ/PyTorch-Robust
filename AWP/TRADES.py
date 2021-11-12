@@ -78,7 +78,7 @@ def load_cfg() -> Tuple[Config, str]:
     from src.dict2obj import Config
     from src.base import Coach, AdversaryForTrain
     from src.utils import set_seed, activate_benchmark, load_checkpoint, set_logger
-    from awp import AWPForTRADES
+    from src.awp import AWPForTRADES
     from models.base import ADArch
 
     cfg = Config()
@@ -245,7 +245,7 @@ def main(
 
         running_loss = coach.trades(
             trainloader, attacker, leverage=opts.leverage, 
-            warmup_epoch=opts.awp_warmup, epoch=epoch
+            warmup_epochs=opts.awp_warmup, epoch=epoch
         )
 
     # save the model
