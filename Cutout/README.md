@@ -29,3 +29,19 @@
 
 	python STD.py wrn_28_10 svhn --n-holes=1 --length=20 --epochs=160 -lr=0.01 -lp=Cutout-svhn
 
+
+
+## Evaluation
+
+
+
+### CIFAR-10
+
+
+
+|      |   Net    |      | Clean | CIFAR-10-C |
+| :--: | :------: | :--: | :---: | :--------: |
+|  AT  | ResNet18 | last | 96.09 |            |
+
+
+

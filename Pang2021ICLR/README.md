@@ -44,6 +44,7 @@ examples.
 |    AT     |      8/255      | ResNet32 | last | 76.65 | 43.87 |
 |    AT     |      8/255      | ResNet18 | last | 84.15 | 48.72 |
 |    AT     |      8/255      | ResNet18 | best | 84.15 | 48.72 |
+|    ALP    |      8/255      | ResNet32 | last | 81.38 |       |
 | ALP(0.5)  |      8/255      | ResNet18 | last | 86.53 | 47.38 |
 | ALP(0.5)  |      8/255      | ResNet18 | best | 86.53 | 47.38 |
 | TRADES(6) |      8/255      | ResNet18 | last | 82.62 | 49.47 |
