@@ -21,7 +21,7 @@ from .dict2obj import Config
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-ROOT = "../data" # the path saving the data
+ROOT = "../../data" # the path saving the data
 DOWNLOAD = False # whether to download the data
 
 SAVED_FILENAME = "paras.pt" # the filename of saved model paramters
