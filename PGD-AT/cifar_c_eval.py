@@ -9,7 +9,7 @@ from src.utils import timemeter
 from src.config import SAVED_FILENAME, DEVICE
 
 
-METHOD = "WhiteBox"
+METHOD = "Corruption"
 FMT = "{description}={corruption_type}"
 
 CORRUPTIONS = [
@@ -54,7 +54,7 @@ def load_cfg() -> 'Config':
    
     # generate the log path
     _, cfg['log_path'] = generate_path(
-        method=METHOD, dataset_type=opts.dataset,
+        method=METHOD, dataset_type=opts.dataset+'c',
         model=opts.model, description=opts.description
     )
     # set logger
@@ -88,18 +88,18 @@ def load_cifar_c(corruption: str) -> Iterable:
     from src.utils import getLogger
 
     getLogger().info(f"==================Corruption Type: {corruption}==================")
-    if opts.dataset == "cifar10c":
+    if opts.dataset == "cifar10":
         dataset = CIFAR10C(
             corruption_type=corruption,
             transform=T.ToTensor()
         )
-    elif opts.dataset == "cifar100c":
+    elif opts.dataset == "cifar100":
         dataset = CIFAR100C(
             corruption_type=corruption,
             transform=T.ToTensor()
         )
     else:
-        raise NotImplementedError(f"Supported: CIFAR-10|100-C: cifar10c|cifar100c")
+        raise NotImplementedError(f"Supported: CIFAR-10|100-C: cifar10|cifar100")
     testloader = load_dataloader(
         dataset=dataset,
         batch_size=opts.batch_size,
