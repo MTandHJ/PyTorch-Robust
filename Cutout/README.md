@@ -39,9 +39,13 @@
 
 
 
-|      |   Net    |      | Clean | CIFAR-10-C |
-| :--: | :------: | :--: | :---: | :--------: |
-|  AT  | ResNet18 | last | 96.09 |            |
+|      |   Net    |      | Clean |
+| :--: | :------: | :--: | :---: |
+|  AT  | ResNet18 | last | 96.09 |
 
 
+
+|brightness | defocus_blur | fog | gaussian_blur | glass_blur | jpeg_compression | motion_blur | saturate | snow | speckle_noise | contrast | elastic_transform | frost | gaussian_noise | impulse_noise | pixelate | shot_noise | spatter | zoom_blur|
+| :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: |
+|94.698| 81.546| 89.816| 66.970| 62.618| 79.138| 78.608| 93.010| 85.144| 56.670| 80.052| 86.650| 79.334| 40.754| 50.974| 74.496| 52.340| 87.704| 75.572|
 
