@@ -21,7 +21,7 @@ parser.add_argument("info_path", type=str)
 parser.add_argument("--filename", type=str, default=SAVED_FILENAME)
 
 # for AA
-parser.add_argument("--norm", choices=("Linf", "L2"), default="Linf")
+parser.add_argument("--norm", choices=("Linf", "L2", "L1"), default="Linf")
 parser.add_argument("--epsilon", type=float, default=8/255)
 parser.add_argument("--version", choices=("standard", "plus"), default="standard")
 
