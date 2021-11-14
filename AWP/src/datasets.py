@@ -1,6 +1,7 @@
 
 
 from typing import Callable, Optional, Tuple, List, Any
+import torch
 from torch.utils.data import Dataset
 import torchvision.transforms as T
 
@@ -12,8 +13,19 @@ from .utils import getLogger
 from .config import ROOT
 
 
+class Compose(T.Compose):
+
+    def __init__(self, transforms: List):
+        super().__init__(transforms)
+        assert isinstance(transforms, list), f"List of transforms required, but {type(transforms)} received ..."
+
+    def append(self, transform: Callable):
+        self.transforms.append(transform)
 
 class IdentityTransform:
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}()"
 
     def __call__(self, x: Any) -> Any:
         return x
@@ -22,6 +34,17 @@ class OrderTransform:
 
     def __init__(self, transforms: List) -> None:
         self.transforms = transforms
+
+    def append(self, transform: Callable, index: int = 0):
+        self.transforms[index].append(transform)
+
+    def __repr__(self) -> str:
+        format_string = self.__class__.__name__ + '['
+        for t in self.transforms:
+            format_string += '\n'
+            format_string += '    {0}'.format(t)
+        format_string += '\n]'
+        return format_string
 
     def __call__(self, data: Tuple) -> List:
         return [transform(item) for item, transform in zip(data, self.transforms)]
@@ -94,6 +117,7 @@ class WrapperSet(Dataset):
             self.transforms = self.transforms[0]
         else:
             self.transforms = OrderTransform(self.transforms)
+        getLogger().info(self.transforms)
     
     def __len__(self) -> int:
         return len(self.data)
@@ -104,13 +128,13 @@ class WrapperSet(Dataset):
 
 
 AUGMENTATIONS = {
-    'none' : IdentityTransform(),
-    'tensor': T.ToTensor(),
-    'cifar': T.Compose((
+    'none' : Compose([IdentityTransform()]),
+    'tensor': Compose([T.ToTensor()]),
+    'cifar': Compose([
             T.Pad(4, padding_mode='reflect'),
             T.RandomCrop(32),
             T.RandomHorizontalFlip(),
             T.ToTensor()
-        )),
+    ]),
 }
 
