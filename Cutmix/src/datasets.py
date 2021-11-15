@@ -75,7 +75,7 @@ class CutmixTransform:
         return f"{self.__class__.__name__}(alpha={self.alpha}, cutmix_prob={self.cutmix_prob})"
 
     def __call__(self, inputs: torch.Tensor, labels: torch.Tensor) -> Any:
-        return self.mixup(inputs, labels)
+        return self.cutmix(inputs, labels)
 
 class OrderTransform:
 

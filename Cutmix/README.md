@@ -19,3 +19,23 @@
 
 	python STD.py resnet18 cifar100 --alpha=1 --cutmix-prob=0.5 -wd=1e-4 -lr=0.25 -lp=Cutmix --epochs=300 -b=64
 
+
+
+## Evaluation
+
+
+
+### CIFAR-10
+
+
+
+|      |   Net    |      | Clean |
+| :--: | :------: | :--: | :---: |
+|  AT  | ResNet18 | last | 96.18 |
+
+
+
+| brightness | defocus_blur |  fog   | gaussian_blur | glass_blur | jpeg_compression | motion_blur | saturate |  snow  | speckle_noise | contrast | elastic_transform | frost  | gaussian_noise | impulse_noise | pixelate | shot_noise | spatter | zoom_blur |
+| :--------: | :----------: | :----: | :-----------: | :--------: | :--------------: | :---------: | :------: | :----: | :-----------: | :------: | :---------------: | :----: | :------------: | :-----------: | :------: | :--------: | :-----: | :-------: |
+|94.798| 85.880| 90.236| 74.502| 55.860| 76.622| 82.594| 93.100| 86.552| 44.504| 84.380| 86.920| 80.336| 26.668| 51.814| 73.178| 39.334| 90.646| 81.292|
+
