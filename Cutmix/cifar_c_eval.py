@@ -134,7 +134,7 @@ def main(model, log_path, device=DEVICE):
             preds = logits.argmax(-1) == labels
 
             acc_meter.update(preds.sum().item(), n=inputs.size(0), mode="sum")
-            getLogger().info(acc_meter)
+        getLogger().info(acc_meter)
         running_accuracy.append(acc_meter.avg)
 
 
