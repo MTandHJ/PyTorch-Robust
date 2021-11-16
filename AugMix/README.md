@@ -11,11 +11,11 @@
 
 ### CIFAR-10
 
-	python STD.py resnet18 cifar10 --width=3 --depth=1 --severity=3 --alpha=1 -wd=5e-4 -epochs=200 -lp=AugMix
-	python STD.py wrn_28_10 cifar10 --width=3 --depth=1 --severity=3 --alpha=1 -wd=5e-4 -epochs=100 -lp=AugMix
+	python STD.py resnet18 cifar10 --width=3 --depth=1 --severity=3 --alpha=1 -wd=5e-4 --epochs=200 -lp=AugMix
+	python STD.py wrn_28_10 cifar10 --width=3 --depth=1 --severity=3 --alpha=1 -wd=5e-4 --epochs=100 -lp=AugMix
 
 ### CIFAR-100
 
-	python STD.py resnet18 cifar100 --width=3 --depth=1 --severity=3 --alpha=1 -wd=5e-4 -epochs=200 -lp=AugMix
-	python STD.py wrn_28_10 cifar100 --width=3 --depth=1 --severity=3 --alpha=1 -wd=5e-4 -epochs=100 -lp=AugMix
+	python STD.py resnet18 cifar100 --width=3 --depth=1 --severity=3 --alpha=1 -wd=5e-4 --epochs=200 -lp=AugMix
+	python STD.py wrn_28_10 cifar100 --width=3 --depth=1 --severity=3 --alpha=1 -wd=5e-4 --epochs=100 -lp=AugMix
 
