@@ -103,12 +103,13 @@ class Coach:
             loss.backward()
             self.optimizer.step()
 
+            self.learning_policy.step() # update the learning rate at every iteration
+
             accuracy_count = (logits1.argmax(-1) == labels).sum().item()
             self.loss.update(loss.item(), inputs.size(0), mode="mean")
             self.acc.update(accuracy_count, inputs.size(0), mode="sum")
 
         self.progress.display(epoch=epoch) 
-        self.learning_policy.step() # update the learning rate
         return self.loss.avg
 
 
