@@ -81,23 +81,30 @@ class Coach:
     def train(
         self, 
         trainloader: Iterable[Tuple[torch.Tensor, torch.Tensor]], 
-        *, epoch: int = 8888
+        *, jsd: bool = True, epoch: int = 8888
     ) -> float:
 
         self.progress.step() # reset the meter
         self.model.train()
         for inputs, labels in trainloader:
-            inputs = torch.cat(inputs, dim=0).to(self.device)
+            if jsd:
+                inputs = torch.cat(inputs, dim=0).to(self.device)
+            else:
+                inputs = inputs.to(self.device)
             labels = labels.to(self.device)
 
             self.model.train() # make sure in training mode
-            logits1, logits2, logits3 = self.model(inputs).split(labels.size(0))
-            p1, p2, p3 = F.softmax(logits1, dim=-1), F.softmax(logits2, dim=-1), F.softmax(logits3, dim=-1)
-            p_mix = torch.clamp((p1 + p2 + p3) / 3, 1e-7, 1).log()
-            loss = self.loss_func(logits1, labels)
-            loss += F.kl_div(p_mix, p1, reduction='batchmean') * 4
-            loss += F.kl_div(p_mix, p2, reduction='batchmean') * 4
-            loss += F.kl_div(p_mix, p3, reduction='batchmean') * 4
+            if jsd:
+                logits1, logits2, logits3 = self.model(inputs).split(labels.size(0))
+                p1, p2, p3 = F.softmax(logits1, dim=-1), F.softmax(logits2, dim=-1), F.softmax(logits3, dim=-1)
+                p_mix = torch.clamp((p1 + p2 + p3) / 3, 1e-7, 1).log()
+                loss = self.loss_func(logits1, labels)
+                loss += F.kl_div(p_mix, p1, reduction='batchmean') * 4
+                loss += F.kl_div(p_mix, p2, reduction='batchmean') * 4
+                loss += F.kl_div(p_mix, p3, reduction='batchmean') * 4
+            else:
+                logits = self.model(inputs)
+                loss = self.loss_func(logits, labels)
 
             self.optimizer.zero_grad()
             loss.backward()
@@ -163,6 +170,8 @@ class AdversaryForValid(Adversary):
         self.model.defend(defending) # enter 'defending' mode
         self.model.eval()
         for inputs, labels in dataloader:
+            if isinstance(inputs, list):
+                inputs = inputs[0]
             inputs = inputs.to(self.device)
             labels = labels.to(self.device)
             inputs_adv = self.attack(inputs, labels)

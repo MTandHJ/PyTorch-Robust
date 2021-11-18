@@ -11,7 +11,7 @@ from src.utils import timemeter
 
 METHOD = "STD"
 SAVE_FREQ = 5
-FMT = "{description}={width}-{depth}-{severity}-{alpha}" \
+FMT = "{description}={width}-{depth}-{severity}-{alpha}-{jsd}" \
         "{learning_policy}-{optimizer}-{lr}-{weight_decay}" \
         "={batch_size}={transform}"
 
@@ -30,6 +30,7 @@ parser.add_argument("--alpha", type=float, default=1.,
                 help="the hyperparameter of dirichlet and beta distributions ...")
 parser.add_argument("--all-ops", action="store_true", default=False,
                 help="use all augmentations if True ...")
+parser.add_argument("--jsd", action="store_true", default=False)
 
 # basic settings
 parser.add_argument("--loss", type=str, default="cross_entropy")
@@ -86,7 +87,7 @@ def load_cfg() -> Tuple[Config, str]:
     from src.dict2obj import Config
     from src.base import Coach
     from src.utils import set_seed, activate_benchmark, load_checkpoint, set_logger
-    from src.augmentations import MultiAugMix
+    from src.augmentations import MultiAugMix, AugMix
     from models.base import ADArch
 
     cfg = Config()
@@ -118,13 +119,22 @@ def load_cfg() -> Tuple[Config, str]:
         ratio=opts.ratio,
         train=True
     )
-    trainset.transforms.append(
-        MultiAugMix(
-            width=opts.width, depth=opts.depth,
-            severity=opts.severity, alpha=opts.alpha,
-            all_ops=opts.all_ops
+    if opts.jsd:
+        trainset.transforms.append(
+            MultiAugMix(
+                width=opts.width, depth=opts.depth,
+                severity=opts.severity, alpha=opts.alpha,
+                all_ops=opts.all_ops
+            )
         )
-    )
+    else:
+        trainset.transforms.append(
+            AugMix(
+                width=opts.width, depth=opts.depth,
+                severity=opts.severity, alpha=opts.alpha,
+                all_ops=opts.all_ops
+            )
+        )
     if opts.ratio == 0:
         logger.warning(
             "[Warning] The ratio of the validation set is 0. Use testset instead."
