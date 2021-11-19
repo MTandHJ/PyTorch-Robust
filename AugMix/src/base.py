@@ -103,8 +103,8 @@ class Coach:
                 loss += F.kl_div(p_mix, p2, reduction='batchmean') * 4
                 loss += F.kl_div(p_mix, p3, reduction='batchmean') * 4
             else:
-                logits = self.model(inputs)
-                loss = self.loss_func(logits, labels)
+                logits1 = self.model(inputs)
+                loss = self.loss_func(logits1, labels)
 
             self.optimizer.zero_grad()
             loss.backward()
