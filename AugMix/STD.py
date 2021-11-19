@@ -9,7 +9,7 @@ from src.utils import timemeter
 
 
 
-METHOD = "STD"
+METHOD = "AugMix"
 SAVE_FREQ = 5
 FMT = "{description}={width}-{depth}-{severity}-{alpha}-{jsd}" \
         "{learning_policy}-{optimizer}-{lr}-{weight_decay}" \
