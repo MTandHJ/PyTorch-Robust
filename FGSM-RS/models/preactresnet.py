@@ -74,6 +74,7 @@ class PreActResNet(AdversarialDefensiveModule):
         self.layer3 = self._make_layer(block, 256, num_blocks[2], stride=2)
         self.layer4 = self._make_layer(block, 512, num_blocks[3], stride=2)
         self.bn = nn.BatchNorm2d(512 * block.expansion)
+        self.avg_pool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.Linear(512*block.expansion, num_classes)
 
     def _make_layer(self, block, planes, num_blocks, stride):
@@ -91,7 +92,7 @@ class PreActResNet(AdversarialDefensiveModule):
         out = self.layer3(out)
         out = self.layer4(out)
         out = F.relu(self.bn(out))
-        out = F.avg_pool2d(out, 4)
+        out = self.avg_pool(out)
         out = out.view(out.size(0), -1)
         out = self.fc(out)
         return out
