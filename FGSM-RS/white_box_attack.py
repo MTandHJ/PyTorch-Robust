@@ -9,7 +9,7 @@ from src.config import SAVED_FILENAME
 
 
 METHOD = "WhiteBox"
-FMT = "{description}={attack}-{epsilon_min:.4f}-{epsilon_max}-{epsilon_times}-{stepsize}-{steps}"
+FMT = "{description}={attack}-{epsilon_min:.4f}-{epsilon_max}-{epsilon_times}-{stepsize:.5f}-{steps}"
 
 
 parser = argparse.ArgumentParser()

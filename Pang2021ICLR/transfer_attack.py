@@ -12,7 +12,7 @@ from src.utils import timemeter
 from src.config import SAVED_FILENAME
 
 METHOD = "Transfer"
-FMT = "{description}={attack}-{epsilon:.4f}-{stepsize}-{steps}"
+FMT = "{description}={attack}-{epsilon:.4f}-{stepsize:.5f}-{steps}"
 
 parser = argparse.ArgumentParser()
 parser.add_argument("source_model", type=str)

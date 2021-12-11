@@ -11,7 +11,7 @@ from src.utils import timemeter
 METHOD = "AT"
 SAVE_FREQ = 5
 FMT = "{description}={learning_policy}-{optimizer}-{lr_max}-{weight_decay}" \
-        "={attack}-{epsilon:.4f}-{stepsize}-{steps}" \
+        "={attack}-{epsilon:.4f}-{stepsize:.5f}-{steps}" \
         "={batch_size}={transform}"
 
 parser = argparse.ArgumentParser()
