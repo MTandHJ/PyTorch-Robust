@@ -187,11 +187,6 @@ def load_cfg() -> Tuple[Config, str]:
             steps=opts.steps, stepsize=opts.stepsize,
             beta=opts.leverage
         )
-    attack = load_attack(
-        attack_type=opts.attack, epsilon=opts.epsilon,
-        steps=opts.steps, stepsize=opts.stepsize,
-        random_start=True
-    )
     cfg['attacker'] = AdversaryForTrain(
         model=model, attacker=attack
     )
@@ -247,7 +242,7 @@ def main(
             save_checkpoint(
                 info_path, epoch,
                 model=coach.model, optimizer=coach.optimizer, 
-                loss_fn=coach.loss_fn,
+                loss_fn=coach.loss_func,
                 lr_scheduler=coach.learning_policy
             )
 
