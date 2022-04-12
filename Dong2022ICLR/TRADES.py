@@ -31,7 +31,7 @@ parser.add_argument("--reg-weight", type=float, default=300)
 
 # adversarial training settings
 parser.add_argument("--leverage", type=float, default=6.)
-parser.add_argument("--attack", type=str, default="pgd-linf-kl")
+parser.add_argument("--attack", type=str, default="linf", choices=('linf', 'l2'))
 parser.add_argument("--epsilon", type=float, default=8/255)
 parser.add_argument("--stepsize", type=float, default=0.007)
 parser.add_argument("--steps", type=int, default=10)
@@ -85,6 +85,7 @@ def load_cfg() -> Tuple[Config, str]:
     from src.dict2obj import Config
     from src.base import Coach, AdversaryForTrain
     from src.loss_zoo import TRADES_TE
+    from src.attacks import LinfPGDKLdivTE, L2PGDKLdivTE
     from src.utils import set_seed, activate_benchmark, load_checkpoint, set_logger
     from models.base import ADArch
 
@@ -174,6 +175,18 @@ def load_cfg() -> Tuple[Config, str]:
     )
 
     # set the attack
+    if opts.attack == 'linf':
+        attack = LinfPGDKLdivTE(
+            epsilon=opts.epsilon,
+            steps=opts.steps, stepsize=opts.stepsize,
+            beta=opts.leverage
+        )
+    else:
+        attack = L2PGDKLdivTE(
+            epsilon=opts.epsilon,
+            steps=opts.steps, stepsize=opts.stepsize,
+            beta=opts.leverage
+        )
     attack = load_attack(
         attack_type=opts.attack, epsilon=opts.epsilon,
         steps=opts.steps, stepsize=opts.stepsize,
