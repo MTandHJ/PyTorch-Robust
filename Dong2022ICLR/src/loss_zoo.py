@@ -16,6 +16,7 @@ class PGD_TE(AdversarialDefensiveModule):
         self, num_samples: int = 50000, num_classes: int = 10, momentum: float = 0.9, 
         reg_weight: float = 300., start_es: int = 90, end_es: int = 150, device =  DEVICE
     ):
+        super().__init__()
         # initialize soft labels to ont-hot vectors
         self.register_buffer(
             "soft_labels", torch.zeros(num_samples, num_classes, dtype=torch.float).to(device)
