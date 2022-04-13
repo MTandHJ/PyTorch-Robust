@@ -53,7 +53,7 @@ class PGD_TE(AdversarialDefensiveModule):
         self, logits: torch.Tensor, labels: torch.Tensor,
         soft_targets: Optional[torch.Tensor] = None, weight: float = 0.
     ) -> torch.Tensor:
-        if soft_targets:
+        if soft_targets is not None:
             return cross_entropy(logits, labels) + weight * ((F.softmax(logits, dim=-1) - soft_targets) ** 2).mean()
         else:
             return cross_entropy(logits, labels)
@@ -66,7 +66,9 @@ class TRADES_TE(PGD_TE):
         soft_targets: Optional[torch.Tensor] = None, 
         beta: float = 6., weight: float = 0.
     ) -> torch.Tensor:
-        if soft_targets:
+        if soft_targets is not None:
+            # return beta * kl_divergence(logits_adv, logits_nat) + weight * ((F.softmax(logits_adv, dim=-1) - soft_targets) ** 2).mean()
+            # The offcial implementation adopts the following but I think the former is better.
             return beta * kl_divergence(logits_adv, logits_nat) + weight * ((F.softmax(logits_nat, dim=-1) - soft_targets) ** 2).mean()
         else:
             return beta * kl_divergence(logits_adv, logits_nat)

@@ -33,7 +33,7 @@ parser.add_argument("--reg-weight", type=float, default=300)
 parser.add_argument("--leverage", type=float, default=6.)
 parser.add_argument("--attack", type=str, default="linf", choices=('linf', 'l2'))
 parser.add_argument("--epsilon", type=float, default=8/255)
-parser.add_argument("--stepsize", type=float, default=0.007)
+parser.add_argument("--stepsize", type=float, default=2/255) # not 0.007
 parser.add_argument("--steps", type=int, default=10)
 
 # basic settings
@@ -59,7 +59,7 @@ parser.add_argument("--ratio", type=float, default=.0,
                 help="the ratio of validation; use testset if ratio is 0.")
 
 # eval
-parser.add_argument("--eval-train", action="store_true", default=False)
+# parser.add_argument("--eval-train", action="store_true", default=False)
 parser.add_argument("--eval-valid", action="store_false", default=True)
 parser.add_argument("--eval-freq", type=int, default=1,
                 help="for valid dataset only")
@@ -247,8 +247,8 @@ def main(
             )
 
         if epoch % opts.eval_freq == 0:
-            if opts.eval_train:
-                evaluate(trainloader, prefix='Train', epoch=epoch)
+            # if opts.eval_train:
+            #     evaluate(trainloader, prefix='Train', epoch=epoch)
             if opts.eval_valid:
                 acc_nat, acc_rob = evaluate(validloader, prefix="Valid", epoch=epoch)
                 coach.check_best(acc_nat, acc_rob, info_path, epoch=epoch)
@@ -259,7 +259,7 @@ def main(
     coach.save(info_path)
 
     # final evaluation
-    evaluate(trainloader, prefix='Train', epoch=opts.epochs)
+    # evaluate(trainloader, prefix='Train', epoch=opts.epochs)
     acc_nat, acc_rob = evaluate(validloader, prefix="Valid", epoch=opts.epochs)
     coach.check_best(acc_nat, acc_rob, info_path, epoch=opts.epochs) 
 

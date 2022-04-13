@@ -176,7 +176,7 @@ class LinfPGDTE(LinfPGD):
         self, logits: torch.Tensor, targets: torch.Tensor,
         soft_targets: Optional[torch.Tensor] = None, weight: float = 0.
     ) -> torch.Tensor:
-        if soft_targets:
+        if soft_targets is not None:
             return cross_entropy(logits, targets) + weight * ((F.softmax(logits, dim=-1) - soft_targets) ** 2).mean()
         else:
             return cross_entropy(logits, targets)
@@ -251,7 +251,7 @@ class LinfPGDKLdivTE(LinfPGDTE):
         self, logits_adv: torch.Tensor, logits_nat: torch.Tensor,
         soft_targets: Optional[torch.Tensor] = None, weight: float = 0.
     ) -> torch.Tensor:
-        if soft_targets:
+        if soft_targets is not None:
             return self.beta * kl_divergence(logits_adv, logits_nat) + weight * ((F.softmax(logits_adv, dim=-1) - soft_targets) ** 2).mean()
         else:
             return kl_divergence(logits_adv, logits_nat, reduction='sum')
