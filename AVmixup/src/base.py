@@ -107,11 +107,11 @@ class Coach:
             labels = labels.to(self.device)
 
             clipped = attacker(inputs, labels)
-            inputs = self.AVmixup(inputs, clipped, labels)
+            inputs, targets = self.AVmixup(inputs, clipped, labels)
 
             self.model.train()
             outs = self.model(inputs)
-            loss = self.loss_func(outs, labels)
+            loss = cross_entropy_with_probs(outs, targets)
 
             self.optimizer.zero_grad()
             loss.backward()

@@ -46,9 +46,9 @@ parser.add_argument("-beta2", "--beta2", type=float, default=0.999,
 parser.add_argument("-wd", "--weight_decay", type=float, default=2e-4,
                 help="weight decay")
 parser.add_argument("-lr", "--lr", "--LR", "--learning_rate", type=float, default=0.1)
-parser.add_argument("-lp", "--learning_policy", type=str, default="", 
+parser.add_argument("-lp", "--learning_policy", type=str, default="AVmixup", 
                 help="learning rate schedule defined in config.py")
-parser.add_argument("--epochs", type=int, default=27)
+parser.add_argument("--epochs", type=int, default=204) # 80000 iterations exactly
 parser.add_argument("-b", "--batch_size", type=int, default=128)
 parser.add_argument("--transform", type=str, default='default', 
                 help="the data augmentations which will be applied during training.")
@@ -88,13 +88,15 @@ def avmixup(
     lambda1: float = opts.lambda1, lambda2: float = opts.lambda2
 ):
     x_av = x_nat + (x_adv - x_nat) * gamma
-    alpha = torch.rand(labels.size())
+    alpha = torch.rand(labels.size(), device=labels.device)
     one_hot = F.one_hot(labels, num_classes).to(x_nat.dtype)
     y1 = one_hot * lambda1 + (1 - one_hot) * (1 - lambda1) / (num_classes - 1)
     y2 = one_hot * lambda2 + (1 - one_hot) * (1 - lambda2) / (num_classes - 1)
-    
+    y1, y2 = y1.to(x_nat.device), y2.to(x_av.device)
+
+    alpha = atleast_kd(alpha, y1.ndim)
     y = y1 * alpha + y2 * (1 - alpha)
-    alpha = atleast_kd(alpha, x.ndim)
+    alpha = atleast_kd(alpha, x_nat.ndim)
     x = x_nat * alpha + x_av * alpha
     return x, y
 
