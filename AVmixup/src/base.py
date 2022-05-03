@@ -153,7 +153,7 @@ class AdversaryForTrain(Adversary):
 
     @enter_attack_exit
     def attack(self, inputs: torch.Tensor, targets: Union[Iterable, torch.Tensor]) -> torch.Tensor:
-        self.model.eval() # some methods require training mode
+        self.model.train() # AVmixup: training mode !
         return self.attacker(self.model, inputs, targets)
 
 class AdversaryForValid(Adversary): 

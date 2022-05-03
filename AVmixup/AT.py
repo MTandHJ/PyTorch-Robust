@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+
+i#!/usr/bin/env python
 
 from email import policy
 import torch
@@ -88,6 +89,7 @@ def avmixup(
     lambda1: float = opts.lambda1, lambda2: float = opts.lambda2
 ):
     x_av = x_nat + (x_adv - x_nat) * gamma
+    x_av = x_av.clamp(0, 1)
     alpha = torch.rand(labels.size(), device=labels.device)
     one_hot = F.one_hot(labels, num_classes).to(x_nat.dtype)
     y1 = one_hot * lambda1 + (1 - one_hot) * (1 - lambda1) / (num_classes - 1)
@@ -97,7 +99,7 @@ def avmixup(
     alpha = atleast_kd(alpha, y1.ndim)
     y = y1 * alpha + y2 * (1 - alpha)
     alpha = atleast_kd(alpha, x_nat.ndim)
-    x = x_nat * alpha + x_av * alpha
+    x = x_nat * alpha + x_av * (1 - alpha)
     return x, y
 
 
