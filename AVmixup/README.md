@@ -28,3 +28,18 @@
 ### Tiny ImageNet
 
     python AT.py wrn_34_10 tinyimagenet --gamma=2 --lambda1=1 --lambda2=0.1
+
+
+## Evaluation
+
+**Note:** So far I haven't tested it on Wide ResNet, which is the default model used in the paper. 
+Therefore, I am not sure if this implementation is correct.
+
+### CIFAR-10
+
+
+|    | $\ell_{\infty}$ |   Net    |      | Clean | PGD-10 |  AA   |
+|:--:|:---------------:|:--------:|:----:|:-----:|:------:|:-----:|
+| AT |      8/255      | ResNet18 | last | 76.92 | 53.57  |  --   |
+| AT |      8/255      | ResNet18 | best | 89.07 | 61.30  | 20.57 |
+
